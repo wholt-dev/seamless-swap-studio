@@ -21,11 +21,14 @@ import {
   TOKEN_FACTORY_ABI,
   TOKEN_FACTORY_ADDRESS,
   TOKEN_FACTORY_CHAIN_ID,
+  TOKEN_FACTORY_EXPLORER,
+  TOKEN_FACTORY_RPC,
+  TOKEN_FACTORY_NATIVE_SYMBOL,
+  TOKEN_FACTORY_DEFAULT_FEE,
   CUSTOM_TOKEN_ABI,
-  SEPOLIA_EXPLORER,
   type TokenInfo,
 } from "@/lib/tokenFactory";
-import { errMsg, shortAddr } from "@/lib/litvm";
+import { errMsg, shortAddr, EXPLORER_URL } from "@/lib/litvm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 

@@ -218,7 +218,7 @@ export default function Deploy() {
 
       const fee = (await factory.deployFee()) as bigint;
 
-      setStatus({ kind: "info", msg: `Deploying ${symbol}… confirm in wallet (${formatUnits(fee, 18)} ETH fee)` });
+      setStatus({ kind: "info", msg: `Deploying ${symbol}… confirm in wallet (${formatUnits(fee, 18)} zkLTC fee)` });
       const tx = await factory.deployToken(
         name,
         symbol,
@@ -314,7 +314,7 @@ export default function Deploy() {
           </div>
           <h1 className="font-display text-4xl text-gradient-fire md:text-5xl">Deploy ERC-20</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            One-click ERC-20 factory · {deployFee} ETH fee · LitVM testnet
+            One-click ERC-20 factory · {deployFee} zkLTC fee · LitVM testnet
           </p>
         </div>
 
@@ -529,7 +529,7 @@ export default function Deploy() {
                     </>
                   ) : (
                     <>
-                      <Rocket className="h-4 w-4" /> Deploy Token ({deployFee} ETH)
+                      <Rocket className="h-4 w-4" /> Deploy Token ({deployFee} zkLTC)
                     </>
                   )}
                 </button>
@@ -544,7 +544,7 @@ export default function Deploy() {
                 </div>
                 <ol className="space-y-2 text-sm text-foreground/85">
                   <li>1. Fill token details &amp; pick features.</li>
-                  <li>2. Pay {deployFee} ETH deploy fee on LitVM.</li>
+                  <li>2. Pay {deployFee} zkLTC deploy fee on LitVM.</li>
                   <li>3. Factory deploys your ERC-20 instantly.</li>
                   <li>4. Full supply minted to your wallet.</li>
                 </ol>

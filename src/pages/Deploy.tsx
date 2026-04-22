@@ -207,7 +207,7 @@ export default function Deploy() {
         try {
           await switchChain({ chainId: TOKEN_FACTORY_CHAIN_ID });
         } catch {
-          await ensureSepolia();
+          await ensureLitVM();
         }
       }
 
@@ -269,7 +269,7 @@ export default function Deploy() {
     try {
       if (!onSepolia) {
         try { await switchChain({ chainId: TOKEN_FACTORY_CHAIN_ID }); }
-        catch { await ensureSepolia(); }
+        catch { await ensureLitVM(); }
       }
       const provider = new BrowserProvider(eth as unknown as ConstructorParameters<typeof BrowserProvider>[0]);
       const signer = await provider.getSigner();
@@ -490,7 +490,7 @@ export default function Deploy() {
                           <Copy className="inline h-3 w-3" /> copy
                         </button>
                         <a
-                          href={`${SEPOLIA_EXPLORER}/address/${status.tokenAddr}`}
+                          href={`${TOKEN_FACTORY_EXPLORER}/address/${status.tokenAddr}`}
                           target="_blank"
                           rel="noreferrer"
                           className="hover:text-foreground"
@@ -501,7 +501,7 @@ export default function Deploy() {
                     )}
                     {status.kind === "ok" && status.tx && (
                       <a
-                        href={`${SEPOLIA_EXPLORER}/tx/${status.tx}`}
+                        href={`${TOKEN_FACTORY_EXPLORER}/tx/${status.tx}`}
                         target="_blank"
                         rel="noreferrer"
                         className="mt-1 inline-flex items-center gap-1 text-xs hover:text-foreground"
@@ -631,7 +631,7 @@ function TokenCard({
           </button>
         </div>
         <a
-          href={`${SEPOLIA_EXPLORER}/address/${token.contractAddress}`}
+          href={`${TOKEN_FACTORY_EXPLORER}/address/${token.contractAddress}`}
           target="_blank"
           rel="noreferrer"
           className="text-muted-foreground hover:text-primary"

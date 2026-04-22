@@ -21,11 +21,14 @@ import {
   TOKEN_FACTORY_ABI,
   TOKEN_FACTORY_ADDRESS,
   TOKEN_FACTORY_CHAIN_ID,
+  TOKEN_FACTORY_EXPLORER,
+  TOKEN_FACTORY_RPC,
+  TOKEN_FACTORY_NATIVE_SYMBOL,
+  TOKEN_FACTORY_DEFAULT_FEE,
   CUSTOM_TOKEN_ABI,
-  SEPOLIA_EXPLORER,
   type TokenInfo,
 } from "@/lib/tokenFactory";
-import { errMsg, shortAddr } from "@/lib/litvm";
+import { errMsg, shortAddr, EXPLORER_URL } from "@/lib/litvm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 
@@ -59,13 +62,15 @@ function getEthereum(): { request: (args: { method: string; params?: unknown[] }
   return (window as unknown as { ethereum?: { request: (args: { method: string; params?: unknown[] }) => Promise<unknown> } }).ethereum ?? null;
 }
 
-async function ensureSepolia() {
+const LITVM_CHAIN_HEX = "0x" + TOKEN_FACTORY_CHAIN_ID.toString(16);
+
+async function ensureLitVM() {
   const eth = getEthereum();
   if (!eth) throw new Error("No wallet detected");
   try {
     await eth.request({
       method: "wallet_switchEthereumChain",
-      params: [{ chainId: "0xaa36a7" }], // 11155111
+      params: [{ chainId: LITVM_CHAIN_HEX }],
     });
   } catch (err: unknown) {
     const e = err as { code?: number };
@@ -74,11 +79,11 @@ async function ensureSepolia() {
         method: "wallet_addEthereumChain",
         params: [
           {
-            chainId: "0xaa36a7",
-            chainName: "Sepolia",
-            nativeCurrency: { name: "Sepolia ETH", symbol: "ETH", decimals: 18 },
-            rpcUrls: ["https://sepolia.drpc.org"],
-            blockExplorerUrls: [SEPOLIA_EXPLORER],
+            chainId: LITVM_CHAIN_HEX,
+            chainName: "LitVM LiteForge",
+            nativeCurrency: { name: "zkLTC", symbol: TOKEN_FACTORY_NATIVE_SYMBOL, decimals: 18 },
+            rpcUrls: [TOKEN_FACTORY_RPC],
+            blockExplorerUrls: [TOKEN_FACTORY_EXPLORER],
           },
         ],
       });
@@ -108,18 +113,18 @@ export default function Deploy() {
   const [allTokens, setAllTokens] = useState<TokenInfo[]>([]);
   const [refreshKey, setRefreshKey] = useState(0);
 
-  const onSepolia = chainId === TOKEN_FACTORY_CHAIN_ID;
+  const onLitVM = chainId === TOKEN_FACTORY_CHAIN_ID;
 
   const update = <K extends keyof FormState>(k: K, v: FormState[K]) =>
     setForm((f) => ({ ...f, [k]: v }));
 
-  // Load factory stats + tokens via public RPC (read-only, doesn't need wallet on Sepolia)
+  // Load factory stats + tokens via public RPC (read-only, doesn't need wallet on LitVM)
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
         const { JsonRpcProvider } = await import("ethers");
-        const provider = new JsonRpcProvider("https://sepolia.drpc.org");
+        const provider = new JsonRpcProvider("https://api.republicstats.xyz/litvm/rpc");
         const factory = new Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, provider);
 
         const [fee, total] = await Promise.all([
@@ -196,13 +201,13 @@ export default function Deploy() {
       return setStatus({ kind: "error", msg: "Supply must be a positive integer" });
 
     setBusy(true);
-    setStatus({ kind: "info", msg: "Switching to Sepolia…" });
+    setStatus({ kind: "info", msg: "Switching to LitVM…" });
     try {
-      if (!onSepolia) {
+      if (!onLitVM) {
         try {
           await switchChain({ chainId: TOKEN_FACTORY_CHAIN_ID });
         } catch {
-          await ensureSepolia();
+          await ensureLitVM();
         }
       }
 
@@ -213,7 +218,7 @@ export default function Deploy() {
 
       const fee = (await factory.deployFee()) as bigint;
 
-      setStatus({ kind: "info", msg: `Deploying ${symbol}… confirm in wallet (${formatUnits(fee, 18)} ETH fee)` });
+      setStatus({ kind: "info", msg: `Deploying ${symbol}… confirm in wallet (${formatUnits(fee, 18)} zkLTC fee)` });
       const tx = await factory.deployToken(
         name,
         symbol,
@@ -248,7 +253,7 @@ export default function Deploy() {
         tx: tx.hash,
         tokenAddr,
       });
-      toast({ title: "Token deployed!", description: `${symbol} live on Sepolia` });
+      toast({ title: "Token deployed!", description: `${symbol} live on LitVM` });
       setForm(DEFAULT_FORM);
       setRefreshKey((k) => k + 1);
     } catch (e) {
@@ -262,9 +267,9 @@ export default function Deploy() {
     const eth = getEthereum();
     if (!eth) return toast({ title: "No wallet", description: "Connect wallet first" });
     try {
-      if (!onSepolia) {
+      if (!onLitVM) {
         try { await switchChain({ chainId: TOKEN_FACTORY_CHAIN_ID }); }
-        catch { await ensureSepolia(); }
+        catch { await ensureLitVM(); }
       }
       const provider = new BrowserProvider(eth as unknown as ConstructorParameters<typeof BrowserProvider>[0]);
       const signer = await provider.getSigner();
@@ -309,7 +314,7 @@ export default function Deploy() {
           </div>
           <h1 className="font-display text-4xl text-gradient-fire md:text-5xl">Deploy ERC-20</h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            One-click ERC-20 factory · {deployFee} ETH fee · Sepolia testnet
+            One-click ERC-20 factory · {deployFee} zkLTC fee · LitVM testnet
           </p>
         </div>
 
@@ -332,20 +337,20 @@ export default function Deploy() {
       </header>
 
       {/* Network warning */}
-      {isConnected && !onSepolia && (
+      {isConnected && !onLitVM && (
         <div className="flex items-start gap-3 rounded-sm border border-fire/40 bg-fire/10 px-4 py-3 text-sm">
           <AlertTriangle className="mt-0.5 h-4 w-4 shrink-0 text-fire" />
           <div className="flex-1">
             <div className="font-medium text-foreground">Wrong network</div>
             <div className="text-xs text-muted-foreground">
-              TokenFactory lives on Sepolia (Chain 11155111). Switch network to deploy.
+              TokenFactory lives on LitVM LiteForge (Chain 4441). Switch network to deploy.
             </div>
           </div>
           <button
             onClick={() => switchChain({ chainId: TOKEN_FACTORY_CHAIN_ID })}
             className="rounded-sm border border-fire bg-fire/20 px-3 py-1.5 text-xs font-medium text-fire hover:bg-fire/30"
           >
-            Switch to Sepolia
+            Switch to LitVM
           </button>
         </div>
       )}
@@ -485,7 +490,7 @@ export default function Deploy() {
                           <Copy className="inline h-3 w-3" /> copy
                         </button>
                         <a
-                          href={`${SEPOLIA_EXPLORER}/address/${status.tokenAddr}`}
+                          href={`${TOKEN_FACTORY_EXPLORER}/address/${status.tokenAddr}`}
                           target="_blank"
                           rel="noreferrer"
                           className="hover:text-foreground"
@@ -496,7 +501,7 @@ export default function Deploy() {
                     )}
                     {status.kind === "ok" && status.tx && (
                       <a
-                        href={`${SEPOLIA_EXPLORER}/tx/${status.tx}`}
+                        href={`${TOKEN_FACTORY_EXPLORER}/tx/${status.tx}`}
                         target="_blank"
                         rel="noreferrer"
                         className="mt-1 inline-flex items-center gap-1 text-xs hover:text-foreground"
@@ -524,7 +529,7 @@ export default function Deploy() {
                     </>
                   ) : (
                     <>
-                      <Rocket className="h-4 w-4" /> Deploy Token ({deployFee} ETH)
+                      <Rocket className="h-4 w-4" /> Deploy Token ({deployFee} zkLTC)
                     </>
                   )}
                 </button>
@@ -539,7 +544,7 @@ export default function Deploy() {
                 </div>
                 <ol className="space-y-2 text-sm text-foreground/85">
                   <li>1. Fill token details &amp; pick features.</li>
-                  <li>2. Pay {deployFee} ETH deploy fee on Sepolia.</li>
+                  <li>2. Pay {deployFee} zkLTC deploy fee on LitVM.</li>
                   <li>3. Factory deploys your ERC-20 instantly.</li>
                   <li>4. Full supply minted to your wallet.</li>
                 </ol>
@@ -549,7 +554,7 @@ export default function Deploy() {
                   <AlertTriangle className="h-3.5 w-3.5 text-fire" /> Heads up
                 </div>
                 <p className="text-foreground/75">
-                  Factory is deployed on <span className="text-fire">Sepolia testnet</span>, not LitVM.
+                  Factory is deployed on <span className="text-fire">LitVM testnet</span>, not LitVM.
                   You'll be prompted to switch networks when deploying.
                 </p>
               </div>
@@ -626,7 +631,7 @@ function TokenCard({
           </button>
         </div>
         <a
-          href={`${SEPOLIA_EXPLORER}/address/${token.contractAddress}`}
+          href={`${TOKEN_FACTORY_EXPLORER}/address/${token.contractAddress}`}
           target="_blank"
           rel="noreferrer"
           className="text-muted-foreground hover:text-primary"

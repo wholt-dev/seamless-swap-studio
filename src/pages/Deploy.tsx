@@ -262,18 +262,42 @@ export default function Deploy() {
           })
         );
         if (cancelled) return;
-        setAllTokens(infos.filter((i): i is TokenInfo => i !== null));
+        const allInfos = infos.filter((i): i is TokenInfo => i !== null);
+        setAllTokens(allInfos);
 
         if (address) {
-          const mine = (await factory.getTokensByCreator(address)) as string[];
-          const myInfos = await Promise.all(
-            mine.map(async (addr) => {
-              try { return (await factory.getTokenInfo(addr)) as TokenInfo; }
-              catch { return null; }
-            })
-          );
+          // Try contract method first
+          let mineAddrs: string[] = [];
+          try {
+            mineAddrs = (await factory.getTokensByCreator(address)) as string[];
+          } catch { /* ignore — we'll fallback */ }
+
+          // Fallback: scan all tokens for creator match (handles checksum/case mismatches)
+          let myInfos: TokenInfo[];
+          if (mineAddrs.length > 0) {
+            myInfos = (
+              await Promise.all(
+                mineAddrs.map(async (addr) => {
+                  try { return (await factory.getTokenInfo(addr)) as TokenInfo; }
+                  catch { return null; }
+                })
+              )
+            ).filter((i): i is TokenInfo => i !== null);
+          } else {
+            // Scan ALL tokens (not just recent 20) for creator match
+            const fullInfos = await Promise.all(
+              all.map(async (addr) => {
+                try { return (await factory.getTokenInfo(addr)) as TokenInfo; }
+                catch { return null; }
+              })
+            );
+            const lower = address.toLowerCase();
+            myInfos = fullInfos
+              .filter((i): i is TokenInfo => i !== null)
+              .filter((i) => i.creator?.toLowerCase() === lower);
+          }
           if (cancelled) return;
-          setMyTokens(myInfos.filter((i): i is TokenInfo => i !== null).reverse());
+          setMyTokens(myInfos.reverse());
         } else {
           setMyTokens([]);
         }

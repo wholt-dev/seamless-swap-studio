@@ -262,6 +262,8 @@ export default function Forge() {
         abi: abi as never,
         bytecode: bytecode as `0x${string}`,
         args: [],
+        account: walletClient.account,
+        chain: walletClient.chain,
       });
       setDeploy({ kind: "deploying", tx: hash });
       const receipt = await publicClient!.waitForTransactionReceipt({ hash });

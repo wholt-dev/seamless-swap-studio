@@ -71,16 +71,18 @@ export const SWAP_TOKENS: Token[] = [
 ];
 
 export const DAPPS = [
-  { name: "Ayni", icon: "🏦", desc: "Cross-chain stablecoin lending", url: "https://www.aynilabs.xyz/dashboard/", category: "DeFi" },
-  { name: "OmniFun", icon: "🚀", desc: "Bonding curve token launchpad", url: "https://omnifun.io", category: "Launchpad" },
-  { name: "LendVault", icon: "🏛", desc: "Borrow/lend against collectibles", url: "https://lendvault.io", category: "RWA" },
-  { name: "MidasPredict", icon: "🔮", desc: "Permissionless prediction market", url: "https://midaspredict.com", category: "Prediction" },
-  { name: "AutoIncentive", icon: "🤖", desc: "x402 USDC microtransaction infra", url: "https://autoincentive.io", category: "AI" },
-  { name: "LitCash", icon: "🔒", desc: "Non-custodial privacy solution", url: "https://litcash.io", category: "Privacy" },
-  { name: "Dappit", icon: "⚡", desc: "AI-powered dapp deployment", url: "https://dappit.io", category: "Dev" },
+  { name: "Ayni Labs", icon: "🏦", desc: "Cross-chain stablecoin lending", url: "https://www.aynilabs.xyz/", category: "DeFi" },
+  { name: "OnmiFun", icon: "🚀", desc: "Bonding curve token launchpad", url: "https://app.onmi.fun/?chain=LITVM", category: "Launchpad" },
+  { name: "LendVault", icon: "🏛", desc: "Borrow/lend against collectibles", url: "https://www.lendvault.io/", category: "RWA" },
+  { name: "MidasHand", icon: "🔮", desc: "Permissionless prediction market", url: "https://www.midashand.xyz/", category: "Prediction" },
+  { name: "AutoIncentive", icon: "🤖", desc: "x402 USDC microtransaction infra", url: "https://autoincentive.online/", category: "AI" },
+  { name: "LitCash", icon: "🔒", desc: "Non-custodial privacy solution", url: "https://litvm.cash/", category: "Privacy" },
+  { name: "Dappit", icon: "⚡", desc: "AI-powered dapp deployment", url: "https://dappit.io/", category: "Dev" },
   { name: "LiteForge", icon: "🔍", desc: "Block explorer for LitVM", url: EXPLORER_URL, category: "Infra" },
-  { name: "Lester Labs", icon: "🧪", desc: "Token minter, launchpad, governance", url: "https://lesterlabs.io", category: "Infra" },
-  { name: "dzkLTC Swap", icon: "🎰", desc: "Swap zkLTC to dzkLTC + Spin game", url: "https://darkzone.vercel.app", category: "DeFi" },
+  { name: "Lester Labs", icon: "🧪", desc: "Token minter, launchpad, governance", url: "https://www.lester-labs.com/", category: "Infra" },
+  { name: "LiteSwap", icon: "🔁", desc: "Native AMM on LitVM", url: "https://liteswap.app/?tab=home", category: "DeFi" },
+  { name: "ZNS", icon: "🆔", desc: "On-chain naming service", url: "https://zns.bio/", category: "Identity" },
+  { name: "Penny4Thots", icon: "💭", desc: "Social thoughts marketplace", url: "https://penny4thots.my/", category: "Social" },
 ];
 
 export function isNativeAddr(a?: string) {

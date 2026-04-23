@@ -383,11 +383,14 @@ export default function Forge() {
       }
       const { functionName, args, value } = buildFactoryCall();
 
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const callArgs: any = args;
+
       await publicClient!.simulateContract({
         address: LITVM_FACTORY_ADDRESS,
         abi: LITVM_FACTORY_ABI,
         functionName,
-        args,
+        args: callArgs,
         value,
         account: address,
       });
@@ -396,7 +399,7 @@ export default function Forge() {
         address: LITVM_FACTORY_ADDRESS,
         abi: LITVM_FACTORY_ABI,
         functionName,
-        args,
+        args: callArgs,
         value,
         account: walletClient.account,
         chain: walletClient.chain,
@@ -412,7 +415,8 @@ export default function Forge() {
           const decoded = decodeEventLog({
             abi: LITVM_FACTORY_ABI,
             data: log.data as Hex,
-            topics: log.topics,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            topics: (log as any).topics,
           });
           if (decoded.eventName === "ContractDeployed") {
             const a = (decoded.args as unknown as { contractAddress: `0x${string}` }).contractAddress;
@@ -420,6 +424,7 @@ export default function Forge() {
             break;
           }
         } catch {
+          /* skip non-matching logs */
         }
       }
       if (!deployedAddr) throw new Error("Deployment confirmed but contract address not found in logs.");

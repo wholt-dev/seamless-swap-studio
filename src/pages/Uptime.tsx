@@ -1,4 +1,4 @@
-import { Activity } from "lucide-react";
+// (Activity icon removed per design — heading uses gradient only)
 import { useEffect, useState } from "react";
 import { RPC_URL } from "@/lib/litvm";
 

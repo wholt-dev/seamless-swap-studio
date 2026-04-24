@@ -773,6 +773,17 @@ export default function Swap() {
         }}
         tokenBalances={tokenBalances}
       />
+
+      {/* ── Final result modal (themed pop-up) ── */}
+      <TxResultModal
+        open={resultModal.open}
+        onClose={() => setResultModal((s) => ({ ...s, open: false }))}
+        kind={resultModal.kind}
+        title={resultModal.title}
+        subtitle={resultModal.subtitle}
+        txHash={resultModal.txHash}
+        details={resultModal.details}
+      />
     </div>
   );
 }

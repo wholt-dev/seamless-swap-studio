@@ -126,7 +126,7 @@ function TokenPickerModal({
           {filtered.map((t) => (
             <button key={t.address} onClick={() => onPick(t.address)} className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-primary/10">
               <div className="flex items-center gap-3">
-                <TokenAvatar symbol={t.symbol} />
+                <TokenAvatar symbol={t.symbol} address={t.address} />
                 <div>
                   <div className="text-sm font-semibold text-foreground">{t.symbol}</div>
                   <div className="font-mono text-[11px] text-muted-foreground">{isNativeAddr(t.address) ? "Native" : shortAddr(t.address)}</div>
@@ -426,7 +426,7 @@ export default function Pool() {
             </div>
             <div className="mt-2 flex items-center gap-3 rounded-xl border border-border bg-background/60 p-3">
               <button onClick={() => setPickerSide("a")} className="flex shrink-0 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 hover:border-primary/40">
-                <TokenAvatar symbol={tokenA?.symbol || "?"} />
+                <TokenAvatar symbol={tokenA?.symbol || "?"} address={tokenA?.address} />
                 <span className="font-display text-sm text-primary">{tokenA?.symbol || "Select"}</span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </button>
@@ -464,7 +464,7 @@ export default function Pool() {
             </div>
             <div className="mt-2 flex items-center gap-3 rounded-xl border border-border bg-background/60 p-3">
               <button onClick={() => setPickerSide("b")} className="flex shrink-0 items-center gap-2 rounded-lg border border-border bg-surface px-3 py-2 hover:border-primary/40">
-                <TokenAvatar symbol={tokenB?.symbol || "?"} />
+                <TokenAvatar symbol={tokenB?.symbol || "?"} address={tokenB?.address} />
                 <span className="font-display text-sm text-primary">{tokenB?.symbol || "Select"}</span>
                 <ChevronDown className="h-4 w-4 text-muted-foreground" />
               </button>

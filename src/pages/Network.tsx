@@ -15,8 +15,8 @@ export default function Network() {
   const { latestBlock, avgBlockTime, gasPriceGwei } = useLitvmNetwork();
   return (
     <div className="space-y-6">
-      <h1 className="flex items-center gap-3 font-display text-4xl">
-        <NetIcon className="h-7 w-7 text-primary" /> Network
+      <h1 className="font-display text-4xl">
+        <span className="text-gradient-aurora">Network</span>
       </h1>
       <div className="panel p-5">
         <Row k="Chain Name" v="LitVM LiteForge" />

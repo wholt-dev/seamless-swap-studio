@@ -520,6 +520,7 @@ export default function Deploy() {
 
           <div className="grid gap-6 lg:grid-cols-[1fr_360px]">
             {/* Left: form */}
+            <TiltCard tiltLimit={5} scale={1.01} className="rounded-2xl">
             <div className="rounded-2xl border border-white/[0.07] bg-[#0d1117] p-6">
               {step === 1 && (
                 <div className="space-y-5">
@@ -730,6 +731,7 @@ export default function Deploy() {
                 </div>
               )}
             </div>
+            </TiltCard>
 
             {/* Right: live preview */}
             <LivePreview form={form} />
@@ -760,6 +762,16 @@ export default function Deploy() {
       </Tabs>
 
       <SubmitModal open={showModal} onClose={() => setShowModal(false)} status={status} />
+
+      <TxResultModal
+        open={resultModal.open}
+        onClose={() => setResultModal((s) => ({ ...s, open: false }))}
+        kind={resultModal.kind}
+        title={resultModal.title}
+        subtitle={resultModal.subtitle}
+        txHash={resultModal.txHash}
+        details={resultModal.details}
+      />
     </div>
   );
 }

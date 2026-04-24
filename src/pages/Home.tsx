@@ -54,7 +54,7 @@ export default function Home() {
               Welcome to <span className="text-gradient-aurora">LitVM</span>
             </h1>
             <p className="mt-2 max-w-xl text-sm text-muted-foreground">
-              The complete on-chain terminal for LiteForge — trade, pool, and deploy on the fastest zkLTC-native ecosystem.
+              The complete on-chain terminal for LiteForge trade, pool, and deploy on the fastest zkLTC-native ecosystem.
             </p>
             <div className="mt-4 flex flex-wrap gap-2">
               <Link to="/swap" className="btn-primary px-4 py-2 text-sm">

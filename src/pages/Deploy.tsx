@@ -420,13 +420,13 @@ export default function Deploy() {
       {/* Header */}
       <header className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
         <div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-blue-500/30 bg-blue-500/5 px-4 py-1.5 text-xs uppercase tracking-[0.25em] text-blue-400">
+          <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs uppercase tracking-[0.25em] text-primary">
             <Rocket className="h-3 w-3" /> Token Launchpad
           </div>
-          <h1 className="mt-3 font-display text-5xl text-white">
-            Deploy <span className="text-blue-400">ERC-20</span>
+          <h1 className="mt-3 font-display text-5xl">
+            <span className="text-gradient-aurora">Deploy ERC-20</span>
           </h1>
-          <p className="mt-1 text-sm text-white/40">
+          <p className="mt-2 max-w-md text-sm text-muted-foreground">
             Launch your token in seconds · {deployFee} zkLTC fee · LitVM testnet
           </p>
         </div>

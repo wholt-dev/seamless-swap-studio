@@ -539,7 +539,20 @@ export default function Swap() {
   }
 
   return (
-    <div className="flex min-h-screen items-start justify-center px-4 pt-10">
+    <div className="flex min-h-screen flex-col items-center px-4 pt-10">
+      {/* ── Page Header (matches Pool style) ── */}
+      <div className="mb-8 w-full max-w-[440px]">
+        <div className="inline-flex items-center gap-2 rounded-full border border-primary/30 bg-primary/5 px-4 py-1.5 text-xs uppercase tracking-[0.25em] text-primary">
+          <ArrowDownUp className="h-3 w-3" /> Swap
+        </div>
+        <h1 className="mt-3 font-display text-4xl">
+          <span className="text-gradient-aurora">Swap Your Assets</span>
+        </h1>
+        <p className="mt-2 max-w-md text-sm text-muted-foreground">
+          Trade tokens instantly across LiteSwap V2 & OmniFun routers on LitVM testnet.
+        </p>
+      </div>
+
       <div className="w-full max-w-[440px]">
 
         {/* ── Swap Card ── */}

@@ -18,6 +18,7 @@ import {
   pickRouter,
   shortAddr,
 } from "@/lib/litvm";
+import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 
 // Some routers expose WZKLTC(), others WETH(). Try both, fallback to constant.
 const ROUTER_WRAPPED_ABI = [
@@ -59,14 +60,26 @@ async function loadTokenMeta(addr: string, owner?: string): Promise<TokenMeta> {
   const decimals = Number(dec);
   return {
     address: addr,
-    symbol: String(sym),
+    symbol: resolveSymbol(addr, String(sym)),
     decimals,
     balance: formatUnits(balRaw as bigint, decimals),
   };
 }
 
-/** Token avatar — first letter on a violet gradient circle */
-function TokenAvatar({ symbol, size = 32 }: { symbol: string; size?: number }) {
+/** Token avatar — uses curated logo if available, falls back to gradient circle with initial */
+function TokenAvatar({ symbol, address, size = 32 }: { symbol: string; address?: string; size?: number }) {
+  const logo = resolveLogo(address ?? "", symbol);
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt={symbol}
+        loading="lazy"
+        className="shrink-0 rounded-full object-cover ring-1 ring-white/10"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   const initial = (symbol || "?").charAt(0).toUpperCase();
   return (
     <div

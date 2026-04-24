@@ -664,11 +664,35 @@ export default function Forge() {
       }
       if (!deployedAddr) throw new Error("Deployment confirmed but contract address not found in logs.");
       setDeploy({ kind: "ok", tx: hash, address: deployedAddr });
+      setShowDeploy(false);
+      setResultModal({
+        open: true,
+        kind: "ok",
+        title: "Contract Deployed",
+        subtitle: `Your ${activeTab.label} is live on LitVM.`,
+        txHash: hash,
+        details: [
+          { label: "Type", value: activeTab.label },
+          { label: "Name", value: contractName },
+          { label: "Contract", value: deployedAddr, addressLink: true },
+        ],
+      });
+      pushWalletTx({
+        hash,
+        kind: "deploy",
+        title: `Deployed ${activeTab.label}`,
+        subtitle: `${contractName} · ${shortAddr(deployedAddr)}`,
+        time: Date.now(),
+        account: address,
+      });
       toast({ title: "Contract deployed 🚀", description: `Live at ${shortAddr(deployedAddr)}` });
       loadMine();
     } catch (e) {
       const err = e as { shortMessage?: string; message?: string };
-      setDeploy({ kind: "error", msg: err?.shortMessage || err?.message || String(e) });
+      const msg = err?.shortMessage || err?.message || String(e);
+      setDeploy({ kind: "error", msg });
+      setShowDeploy(false);
+      setResultModal({ open: true, kind: "error", title: "Deploy Failed", subtitle: msg.slice(0, 200) });
     }
   };
 

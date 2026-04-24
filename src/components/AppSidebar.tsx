@@ -63,14 +63,18 @@ export function AppSidebar() {
     <Sidebar collapsible="icon" className="border-r border-sidebar-border bg-sidebar/80 backdrop-blur-xl">
       <SidebarHeader className="border-b border-sidebar-border p-4">
         <div className="flex items-center gap-3">
-          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-violet shadow-glow-violet">
-            <Sparkles className="h-5 w-5 text-primary-foreground" />
+          <div className="relative flex h-10 w-10 shrink-0 items-center justify-center overflow-hidden rounded-xl shadow-glow-violet">
+            <img
+              src="https://raw.githubusercontent.com/0xluciferxhilde/your-friendly-assistant/main/public/logos/litvm.jpg"
+              alt="LitDeX"
+              className="h-full w-full object-cover"
+            />
             <div className="absolute inset-0 rounded-xl ring-1 ring-inset ring-white/20" />
           </div>
           {!collapsed && (
             <div className="leading-tight">
-              <div className="font-display text-lg font-bold text-gradient-aurora">LitVM</div>
-              <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">Explorer · v2</div>
+              <div className="font-display text-lg font-bold text-gradient-aurora">LitDeX</div>
+              <div className="text-[10px] uppercase tracking-[0.25em] text-muted-foreground">DeFi · v2</div>
             </div>
           )}
         </div>

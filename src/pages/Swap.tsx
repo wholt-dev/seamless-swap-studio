@@ -18,6 +18,7 @@ import {
   pickRouter,
   shortAddr,
 } from "@/lib/litvm";
+import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 
 // Some routers expose WZKLTC(), others WETH(). Try both, fallback to constant.
 const ROUTER_WRAPPED_ABI = [
@@ -59,14 +60,26 @@ async function loadTokenMeta(addr: string, owner?: string): Promise<TokenMeta> {
   const decimals = Number(dec);
   return {
     address: addr,
-    symbol: String(sym),
+    symbol: resolveSymbol(addr, String(sym)),
     decimals,
     balance: formatUnits(balRaw as bigint, decimals),
   };
 }
 
-/** Token avatar — first letter on a violet gradient circle */
-function TokenAvatar({ symbol, size = 32 }: { symbol: string; size?: number }) {
+/** Token avatar — uses curated logo if available, falls back to gradient circle with initial */
+function TokenAvatar({ symbol, address, size = 32 }: { symbol: string; address?: string; size?: number }) {
+  const logo = resolveLogo(address ?? "", symbol);
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt={symbol}
+        loading="lazy"
+        className="shrink-0 rounded-full object-cover ring-1 ring-white/10"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   const initial = (symbol || "?").charAt(0).toUpperCase();
   return (
     <div
@@ -163,7 +176,7 @@ function TokenPickerModal({
                 className="group flex w-full items-center justify-between rounded-xl px-3 py-2.5 text-left transition-colors hover:bg-primary/10"
               >
                 <div className="flex items-center gap-3">
-                  <TokenAvatar symbol={t.symbol} />
+                  <TokenAvatar symbol={t.symbol} address={t.address} />
                   <div>
                     <div className="flex items-center gap-1.5">
                       <span className="text-sm font-semibold text-foreground">{t.symbol}</span>
@@ -604,7 +617,7 @@ export default function Swap() {
                   onClick={() => setPickerSide("in")}
                   className="flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:border-white/20"
                 >
-                  <TokenAvatar symbol={tokenIn?.symbol || "?"} size={26} />
+                  <TokenAvatar symbol={tokenIn?.symbol || "?"} address={tokenIn?.address} size={26} />
                   <span className="text-sm font-semibold text-white">{tokenIn?.symbol || "Select"}</span>
                   <ChevronDown className="h-4 w-4 text-white/40" />
                 </button>
@@ -641,7 +654,7 @@ export default function Swap() {
                   onClick={() => setPickerSide("out")}
                   className="flex shrink-0 items-center gap-2 rounded-xl border border-white/10 bg-white/5 px-3 py-2 transition-colors hover:border-white/20"
                 >
-                  <TokenAvatar symbol={tokenOut?.symbol || "?"} size={26} />
+                  <TokenAvatar symbol={tokenOut?.symbol || "?"} address={tokenOut?.address} size={26} />
                   <span className="text-sm font-semibold text-white">{tokenOut?.symbol || "Select"}</span>
                   <ChevronDown className="h-4 w-4 text-white/40" />
                 </button>

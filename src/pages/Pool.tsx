@@ -21,6 +21,7 @@ import {
   isNativeAddr,
   shortAddr,
 } from "@/lib/litvm";
+import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 
 type TokenMeta = { address: string; symbol: string; decimals: number; balance: string };
 type Status = { kind: "idle" | "info" | "ok" | "error"; msg: string; txHash?: string };
@@ -44,13 +45,25 @@ async function loadTokenMeta(addr: string, owner?: string): Promise<TokenMeta> {
   const decimals = Number(dec);
   return {
     address: addr,
-    symbol: String(sym),
+    symbol: resolveSymbol(addr, String(sym)),
     decimals,
     balance: formatUnits(balRaw as bigint, decimals),
   };
 }
 
-function TokenAvatar({ symbol, size = 28 }: { symbol: string; size?: number }) {
+function TokenAvatar({ symbol, address, size = 28 }: { symbol: string; address?: string; size?: number }) {
+  const logo = resolveLogo(address ?? "", symbol);
+  if (logo) {
+    return (
+      <img
+        src={logo}
+        alt={symbol}
+        loading="lazy"
+        className="shrink-0 rounded-full object-cover ring-1 ring-white/10"
+        style={{ width: size, height: size }}
+      />
+    );
+  }
   const initial = (symbol || "?").charAt(0).toUpperCase();
   return (
     <div

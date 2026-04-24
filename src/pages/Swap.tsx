@@ -562,7 +562,7 @@ export default function Swap() {
           <span className="text-gradient-aurora">Swap Your Assets</span>
         </h1>
         <p className="mt-2 max-w-md text-sm text-muted-foreground">
-          Trade tokens instantly across LiteSwap V2 & OmniFun routers on LitVM testnet.
+          Trade tokens instantly across LitDeX & OmniFun routers on LitVM testnet.
         </p>
       </div>
 

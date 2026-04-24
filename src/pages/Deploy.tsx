@@ -73,9 +73,9 @@ function StepDot({ n, label, state }: { n: number; label: string; state: "done" 
       <div
         className={`flex h-7 w-7 items-center justify-center rounded-full text-xs font-bold transition-all ${
           state === "done"
-            ? "bg-blue-500/30 border border-blue-500/60 text-blue-400 shadow-[0_0_12px_-2px_rgba(59,130,246,0.5)]"
+            ? "bg-teal-500/30 border border-teal-500/60 text-teal-400 shadow-[0_0_12px_-2px_rgba(45,212,191,0.5)]"
             : state === "active"
-            ? "bg-blue-600/30 border border-blue-500/60 text-blue-400 shadow-[0_0_12px_-2px_rgba(59,130,246,0.5)]"
+            ? "bg-teal-600/30 border border-teal-500/60 text-teal-400 shadow-[0_0_12px_-2px_rgba(45,212,191,0.5)]"
             : "border border-white/10 bg-white/5 text-white/30"
         }`}
       >
@@ -83,7 +83,7 @@ function StepDot({ n, label, state }: { n: number; label: string; state: "done" 
       </div>
       <span
         className={`text-sm font-medium transition-colors ${
-          state === "active" ? "text-white" : state === "done" ? "text-blue-400" : "text-white/30"
+          state === "active" ? "text-white" : state === "done" ? "text-teal-400" : "text-white/30"
         }`}
       >
         {label}
@@ -97,8 +97,8 @@ function LivePreview({ form }: { form: FormState }) {
   const initial = (form.symbol || form.name || "?").charAt(0).toUpperCase();
   return (
     <div className="rounded-2xl border border-white/[0.07] bg-[#0d1117] p-5">
-      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-blue-400">
-        <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" /> Live preview
+      <div className="flex items-center gap-2 text-[10px] uppercase tracking-[0.25em] text-teal-400">
+        <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" /> Live preview
       </div>
 
       <div className="mt-6 flex flex-col items-center text-center">
@@ -138,7 +138,7 @@ function LivePreview({ form }: { form: FormState }) {
               key={f.k}
               className={`rounded-full px-2.5 py-0.5 text-[10px] uppercase tracking-wider transition-colors ${
                 on
-                  ? "border border-blue-500/40 bg-blue-500/10 text-blue-400"
+                  ? "border border-teal-500/40 bg-teal-500/10 text-teal-400"
                   : "border border-white/10 bg-white/5 text-white/30"
               }`}
             >
@@ -148,10 +148,10 @@ function LivePreview({ form }: { form: FormState }) {
         })}
       </div>
 
-      <div className="mt-5 flex items-center gap-2 rounded-xl border border-blue-500/20 bg-blue-500/5 p-3 text-xs">
-        <span className="h-1.5 w-1.5 rounded-full bg-blue-400 animate-pulse" />
+      <div className="mt-5 flex items-center gap-2 rounded-xl border border-teal-500/20 bg-teal-500/5 p-3 text-xs">
+        <span className="h-1.5 w-1.5 rounded-full bg-teal-400 animate-pulse" />
         <span className="text-white/40">Deploying to</span>
-        <span className="font-medium text-blue-400">LitVM Testnet</span>
+        <span className="font-medium text-teal-400">LitVM Testnet</span>
       </div>
     </div>
   );
@@ -178,11 +178,11 @@ function SubmitModal({
         </button>
         <div className="flex justify-center">
           {ok ? (
-            <CheckCircle2 className="h-12 w-12 text-blue-400" />
+            <CheckCircle2 className="h-12 w-12 text-teal-400" />
           ) : err ? (
             <AlertTriangle className="h-12 w-12 text-red-400" />
           ) : (
-            <Loader2 className="h-12 w-12 animate-spin text-blue-400" />
+            <Loader2 className="h-12 w-12 animate-spin text-teal-400" />
           )}
         </div>
         <h3 className="mt-4 font-display text-2xl text-white">
@@ -202,14 +202,14 @@ function SubmitModal({
             href={`${EXPLORER_URL}/tx/${status.tx}`}
             target="_blank"
             rel="noreferrer"
-            className="mt-3 inline-flex items-center gap-1.5 text-sm text-blue-400 hover:underline"
+            className="mt-3 inline-flex items-center gap-1.5 text-sm text-teal-400 hover:underline"
           >
             View transaction <ExternalLink className="h-3.5 w-3.5" />
           </a>
         )}
         <button
           onClick={onClose}
-          className="mt-5 h-11 w-full rounded-xl border border-blue-500/60 bg-blue-600/20 text-sm font-semibold text-blue-400 tracking-wide transition-colors hover:bg-blue-600/30"
+          className="mt-5 h-11 w-full rounded-xl border border-teal-500/60 bg-teal-600/20 text-sm font-semibold text-teal-400 tracking-wide transition-colors hover:bg-teal-600/30"
         >
           Done
         </button>
@@ -468,13 +468,13 @@ export default function Deploy() {
 
       <Tabs defaultValue="deploy" className="space-y-6">
         <TabsList className="bg-white/[0.03] border border-white/[0.07] backdrop-blur">
-          <TabsTrigger value="deploy" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="deploy" className="data-[state=active]:bg-teal-600/20 data-[state=active]:text-teal-400">
             <Plus className="mr-1.5 h-3.5 w-3.5" /> Deploy
           </TabsTrigger>
-          <TabsTrigger value="mine" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="mine" className="data-[state=active]:bg-teal-600/20 data-[state=active]:text-teal-400">
             <Wallet className="mr-1.5 h-3.5 w-3.5" /> My Tokens ({myTokens.length})
           </TabsTrigger>
-          <TabsTrigger value="all" className="data-[state=active]:bg-blue-600/20 data-[state=active]:text-blue-400">
+          <TabsTrigger value="all" className="data-[state=active]:bg-teal-600/20 data-[state=active]:text-teal-400">
             <Users className="mr-1.5 h-3.5 w-3.5" /> All Tokens
           </TabsTrigger>
         </TabsList>
@@ -509,7 +509,7 @@ export default function Deploy() {
                       onChange={(e) => update("name", e.target.value)}
                       placeholder="My Awesome Token"
                       maxLength={50}
-                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 text-sm text-white placeholder:text-white/20 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 text-sm text-white placeholder:text-white/20 focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                     />
                     <div className="mt-1 text-[11px] text-white/30">Max 50 characters — appears in wallets</div>
                   </div>
@@ -523,7 +523,7 @@ export default function Deploy() {
                       onChange={(e) => update("symbol", e.target.value.toUpperCase())}
                       placeholder="MAT"
                       maxLength={11}
-                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 font-mono text-sm uppercase text-white placeholder:text-white/20 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 font-mono text-sm uppercase text-white placeholder:text-white/20 focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                     />
                     <div className="mt-1 text-[11px] text-white/30">e.g. MAT — appears on DEXes</div>
                   </div>
@@ -536,7 +536,7 @@ export default function Deploy() {
                       value={form.totalSupply}
                       onChange={(e) => update("totalSupply", e.target.value.replace(/\D/g, ""))}
                       placeholder="1000000"
-                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 font-mono text-sm text-white placeholder:text-white/20 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 font-mono text-sm text-white placeholder:text-white/20 focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                     />
                     <div className="mt-1 text-[11px] text-white/30">
                       {supplyPreview ? `${supplyPreview} ${form.symbol || "tokens"}` : "Whole units (no decimals applied)"}
@@ -549,7 +549,7 @@ export default function Deploy() {
                       value={form.decimals}
                       onChange={(e) => update("decimals", e.target.value.replace(/\D/g, ""))}
                       placeholder="18 (Standard)"
-                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 font-mono text-sm text-white placeholder:text-white/20 focus:border-blue-500/60 focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                      className="h-11 w-full rounded-xl border border-white/[0.07] bg-white/[0.03] px-3.5 font-mono text-sm text-white placeholder:text-white/20 focus:border-teal-500/60 focus:outline-none focus:ring-2 focus:ring-teal-500/20"
                     />
                     <div className="mt-1 text-[11px] text-white/30">18 decimals is standard for most tokens</div>
                   </div>
@@ -558,7 +558,7 @@ export default function Deploy() {
                     <button
                       onClick={() => setStep(2)}
                       disabled={!step1Valid}
-                      className="inline-flex items-center gap-2 rounded-xl border border-blue-500/60 bg-blue-600/20 px-5 py-2.5 text-sm font-semibold text-blue-400 tracking-wide transition-colors hover:bg-blue-600/30 disabled:opacity-40"
+                      className="inline-flex items-center gap-2 rounded-xl border border-teal-500/60 bg-teal-600/20 px-5 py-2.5 text-sm font-semibold text-teal-400 tracking-wide transition-colors hover:bg-teal-600/30 disabled:opacity-40"
                     >
                       Next <ArrowRight className="h-4 w-4" />
                     </button>
@@ -582,8 +582,8 @@ export default function Deploy() {
                       key={f.key}
                       className={`flex cursor-pointer items-center justify-between rounded-xl border p-4 transition-all ${
                         form[f.key]
-                          ? "border-blue-500/40 bg-blue-500/10"
-                          : "border-white/[0.07] bg-white/[0.02] hover:border-blue-500/20"
+                          ? "border-teal-500/40 bg-teal-500/10"
+                          : "border-white/[0.07] bg-white/[0.02] hover:border-teal-500/20"
                       }`}
                     >
                       <div>
@@ -615,7 +615,7 @@ export default function Deploy() {
                     </button>
                     <button
                       onClick={() => setStep(3)}
-                      className="inline-flex items-center gap-2 rounded-xl border border-blue-500/60 bg-blue-600/20 px-5 py-2.5 text-sm font-semibold text-blue-400 tracking-wide transition-colors hover:bg-blue-600/30"
+                      className="inline-flex items-center gap-2 rounded-xl border border-teal-500/60 bg-teal-600/20 px-5 py-2.5 text-sm font-semibold text-teal-400 tracking-wide transition-colors hover:bg-teal-600/30"
                     >
                       Next <ArrowRight className="h-4 w-4" />
                     </button>
@@ -656,7 +656,7 @@ export default function Deploy() {
                               key={f.k}
                               className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${
                                 on
-                                  ? "border border-blue-500/40 bg-blue-500/10 text-blue-400"
+                                  ? "border border-teal-500/40 bg-teal-500/10 text-teal-400"
                                   : "border border-white/10 bg-white/5 text-white/30"
                               }`}
                             >
@@ -669,19 +669,19 @@ export default function Deploy() {
                   </div>
 
                   {/* Fee section */}
-                  <div className="flex items-center justify-between rounded-xl border border-blue-500/30 bg-blue-600/10 p-4">
+                  <div className="flex items-center justify-between rounded-xl border border-teal-500/30 bg-blue-600/10 p-4">
                     <div>
                       <div className="text-xs text-white/40">Deployment Fee</div>
-                      <div className="font-display text-xl text-blue-400">{deployFee} zkLTC</div>
+                      <div className="font-display text-xl text-teal-400">{deployFee} zkLTC</div>
                     </div>
-                    <Coins className="h-6 w-6 text-blue-400/60" />
+                    <Coins className="h-6 w-6 text-teal-400/60" />
                   </div>
 
                   {/* Deploy button */}
                   <button
                     onClick={onDeploy}
                     disabled={busy}
-                    className="h-14 w-full rounded-xl border border-blue-500/60 bg-blue-600/20 text-base font-semibold text-blue-400 tracking-wide transition-colors hover:bg-blue-600/30 disabled:opacity-60 flex items-center justify-center gap-2"
+                    className="h-14 w-full rounded-xl border border-teal-500/60 bg-teal-600/20 text-base font-semibold text-teal-400 tracking-wide transition-colors hover:bg-teal-600/30 disabled:opacity-60 flex items-center justify-center gap-2"
                   >
                     {busy ? <Loader2 className="h-5 w-5 animate-spin" /> : <Rocket className="h-5 w-5" />}
                     Deploy Token
@@ -749,7 +749,7 @@ function TokenCard({
   const supply = formatUnits(token.totalSupply, token.decimals);
 
   return (
-    <div className="rounded-2xl border border-white/[0.07] bg-[#0d1117] p-4 transition-all hover:border-blue-500/30">
+    <div className="rounded-2xl border border-white/[0.07] bg-[#0d1117] p-4 transition-all hover:border-teal-500/30">
       <div className="flex items-start gap-3">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-lg font-bold text-white" style={{background: "linear-gradient(135deg, #2dd4bf, #0d9488)", boxShadow: "0 0 16px -4px rgba(45,212,191,0.5)"}}>
           {initial}
@@ -757,7 +757,7 @@ function TokenCard({
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <div className="truncate font-display text-lg text-white">{token.name}</div>
-            <span className="rounded-full border border-blue-500/30 bg-blue-500/10 px-2 py-0.5 text-[10px] text-blue-400">
+            <span className="rounded-full border border-teal-500/30 bg-teal-500/10 px-2 py-0.5 text-[10px] text-teal-400">
               {token.symbol}
             </span>
           </div>
@@ -795,7 +795,7 @@ function TokenCard({
       </div>
 
       <div className="mt-3 flex flex-wrap gap-1.5">
-        {token.mintable && <span className="rounded-full border border-blue-500/40 bg-blue-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-blue-400">Mintable</span>}
+        {token.mintable && <span className="rounded-full border border-teal-500/40 bg-teal-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-teal-400">Mintable</span>}
         {token.burnable && <span className="rounded-full border border-orange-500/40 bg-orange-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-orange-400">Burnable</span>}
         {token.pausable && <span className="rounded-full border border-yellow-500/40 bg-yellow-500/10 px-2 py-0.5 text-[10px] uppercase tracking-wider text-yellow-400">Pausable</span>}
       </div>
@@ -808,7 +808,7 @@ function TokenCard({
                 const a = prompt("Mint how many tokens?");
                 if (a && /^\d+$/.test(a)) onAction(token.contractAddress, "mint", a);
               }}
-              className="inline-flex items-center gap-1 rounded-lg border border-blue-500/40 bg-blue-500/5 px-2.5 py-1 text-[11px] text-blue-400 hover:bg-blue-500/10"
+              className="inline-flex items-center gap-1 rounded-lg border border-teal-500/40 bg-teal-500/5 px-2.5 py-1 text-[11px] text-teal-400 hover:bg-teal-500/10"
             >
               <Plus className="h-3 w-3" /> Mint
             </button>
@@ -834,7 +834,7 @@ function TokenCard({
               </button>
               <button
                 onClick={() => onAction(token.contractAddress, "unpause")}
-                className="inline-flex items-center gap-1 rounded-lg border border-blue-500/40 bg-blue-500/5 px-2.5 py-1 text-[11px] text-blue-400 hover:bg-blue-500/10"
+                className="inline-flex items-center gap-1 rounded-lg border border-teal-500/40 bg-teal-500/5 px-2.5 py-1 text-[11px] text-teal-400 hover:bg-teal-500/10"
               >
                 <Play className="h-3 w-3" /> Unpause
               </button>

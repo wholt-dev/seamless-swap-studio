@@ -136,6 +136,7 @@ export default function Terminal() {
         <span className="text-gradient-aurora">LitVM Terminal</span>
       </h1>
 
+      <TiltCard tiltLimit={4} scale={1.005} className="rounded-2xl">
       <div className="panel flex h-[70vh] flex-col">
         <div ref={scrollRef} className="flex-1 space-y-4 overflow-y-auto p-4">
           {messages.map((m, i) => m.who === "bot" ? (
@@ -170,6 +171,7 @@ export default function Terminal() {
           </button>
         </form>
       </div>
+      </TiltCard>
     </div>
   );
 }

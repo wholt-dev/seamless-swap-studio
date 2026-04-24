@@ -293,7 +293,7 @@ export default function Pool() {
       const signer = await provider.getSigner();
       const router = new Contract(DEFAULT_ROUTER, ROUTER_ABI, signer);
       const deadline = Math.floor(Date.now() / 1000) + SWAP_DEADLINE_SEC;
-      const slippageBps = 500n; // 5% min
+      const slippageBps = 1000n; // 10% min
       const aWei = parseUnits(amountA, tokenA.decimals);
       const bWei = parseUnits(amountB, tokenB.decimals);
       const aMin = aWei - (aWei * slippageBps) / 10000n;
@@ -301,11 +301,11 @@ export default function Pool() {
 
       let tx;
       if (isNativeAddr(tokenAAddr) && !isNativeAddr(tokenBAddr)) {
-        tx = await router.addLiquidityZKLTC(tokenBAddr, bWei, bMin, aMin, walletAddr, deadline, { value: aWei });
+        tx = await router.addLiquidityZKLTC(tokenBAddr, bWei, 0n, 0n, walletAddr, deadline, { value: aWei });
       } else if (isNativeAddr(tokenBAddr) && !isNativeAddr(tokenAAddr)) {
-        tx = await router.addLiquidityZKLTC(tokenAAddr, aWei, aMin, bMin, walletAddr, deadline, { value: bWei });
+        tx = await router.addLiquidityZKLTC(tokenAAddr, aWei, 0n, 0n, walletAddr, deadline, { value: bWei });
       } else if (!isNativeAddr(tokenAAddr) && !isNativeAddr(tokenBAddr)) {
-        tx = await router.addLiquidity(tokenAAddr, tokenBAddr, aWei, bWei, aMin, bMin, walletAddr, deadline);
+        tx = await router.addLiquidity(tokenAAddr, tokenBAddr, aWei, bWei, 0n, 0n, walletAddr, deadline);
       } else {
         throw new Error("Cannot add zkLTC + zkLTC");
       }

@@ -469,10 +469,18 @@ export default function Swap() {
       setStatus({ kind: "info", msg: "Confirming… " + tx.hash.slice(0, 12) + "…", txHash: tx.hash });
       const receipt = await tx.wait();
       const finalHash = receipt?.hash ?? tx.hash;
-      setStatus({
+      setStatus({ kind: "idle", msg: "" });
+      setResultModal({
+        open: true,
         kind: "ok",
-        msg: `Swap confirmed! tx ${shortAddr(finalHash)}`,
+        title: "Swap Confirmed",
+        subtitle: "Your swap has been settled on LitVM.",
         txHash: finalHash,
+        details: [
+          { label: "Sent", value: `${(+amountIn).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenIn.symbol}` },
+          { label: "Received", value: `${(+amountOut).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}` },
+          { label: "Router", value: routerKey === "omnifun" ? "OmniFun Router" : "LitDeX Router" },
+        ],
       });
       setAmountIn(""); setAmountOut("");
       const [m1, m2] = await Promise.all([
@@ -482,7 +490,13 @@ export default function Swap() {
       setTokenIn(m1); setTokenOut(m2);
       reloadAllowance();
     } catch (e) {
-      setStatus({ kind: "error", msg: "Swap failed: " + errMsg(e).slice(0, 160) });
+      setStatus({ kind: "idle", msg: "" });
+      setResultModal({
+        open: true,
+        kind: "error",
+        title: "Swap Failed",
+        subtitle: errMsg(e).slice(0, 200),
+      });
     } finally {
       setBusy(false);
     }

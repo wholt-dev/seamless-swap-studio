@@ -438,9 +438,7 @@ export default function Swap() {
 
   const onSwap = async () => {
     if (!tokenIn || !tokenOut || !amountIn || !amountOut || !walletAddr || !window.ethereum) return;
-    const inA  = isNativeAddr(tokenInAddr)  ? wethAddr : tokenInAddr;
-    const outA = isNativeAddr(tokenOutAddr) ? wethAddr : tokenOutAddr;
-    const path = [inA, outA];
+    const path = buildSwapPath(tokenInAddr, tokenOutAddr, wethAddr);
 
     setBusy(true);
     setStatus({ kind: "info", msg: "Sending swap transaction…" });

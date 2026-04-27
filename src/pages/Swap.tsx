@@ -46,6 +46,20 @@ type Status = { kind: "idle" | "info" | "ok" | "error"; msg: string; txHash?: st
 
 const readProvider = new JsonRpcProvider(RPC_URL);
 
+/** Build swap path: native ↔ token uses [WZKLTC, token] / [token, WZKLTC],
+ *  token ↔ token always routes through WZKLTC: [tokenIn, WZKLTC, tokenOut]. */
+function buildSwapPath(tokenInAddr: string, tokenOutAddr: string, wzkltc: string): string[] {
+  const inNative = isNativeAddr(tokenInAddr);
+  const outNative = isNativeAddr(tokenOutAddr);
+  if (inNative) return [wzkltc, tokenOutAddr];
+  if (outNative) return [tokenInAddr, wzkltc];
+  // both ERC-20: hop through WZKLTC unless one side is already WZKLTC
+  if (tokenInAddr.toLowerCase() === wzkltc.toLowerCase() || tokenOutAddr.toLowerCase() === wzkltc.toLowerCase()) {
+    return [tokenInAddr, tokenOutAddr];
+  }
+  return [tokenInAddr, wzkltc, tokenOutAddr];
+}
+
 async function loadTokenMeta(addr: string, owner?: string): Promise<TokenMeta> {
   if (isNativeAddr(addr)) {
     let bal = "0";

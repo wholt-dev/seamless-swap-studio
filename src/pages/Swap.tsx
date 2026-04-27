@@ -46,6 +46,20 @@ type Status = { kind: "idle" | "info" | "ok" | "error"; msg: string; txHash?: st
 
 const readProvider = new JsonRpcProvider(RPC_URL);
 
+/** Build swap path: native ↔ token uses [WZKLTC, token] / [token, WZKLTC],
+ *  token ↔ token always routes through WZKLTC: [tokenIn, WZKLTC, tokenOut]. */
+function buildSwapPath(tokenInAddr: string, tokenOutAddr: string, wzkltc: string): string[] {
+  const inNative = isNativeAddr(tokenInAddr);
+  const outNative = isNativeAddr(tokenOutAddr);
+  if (inNative) return [wzkltc, tokenOutAddr];
+  if (outNative) return [tokenInAddr, wzkltc];
+  // both ERC-20: hop through WZKLTC unless one side is already WZKLTC
+  if (tokenInAddr.toLowerCase() === wzkltc.toLowerCase() || tokenOutAddr.toLowerCase() === wzkltc.toLowerCase()) {
+    return [tokenInAddr, tokenOutAddr];
+  }
+  return [tokenInAddr, wzkltc, tokenOutAddr];
+}
+
 async function loadTokenMeta(addr: string, owner?: string): Promise<TokenMeta> {
   if (isNativeAddr(addr)) {
     let bal = "0";
@@ -367,10 +381,11 @@ export default function Swap() {
       setStatus({ kind: "error", msg: "Cannot swap same token." });
       return;
     }
+    const path = buildSwapPath(tokenInAddr, tokenOutAddr, wethAddr);
     try {
       const router = new Contract(routerAddr, ROUTER_SWAP_ABI, readProvider);
       const inWei = parseUnits(amountIn, tokenIn.decimals);
-      const amounts = (await router.getAmountsOut(inWei, [inA, outA])) as bigint[];
+      const amounts = (await router.getAmountsOut(inWei, path)) as bigint[];
       setAmountOut(formatUnits(amounts[amounts.length - 1], tokenOut.decimals));
       setStatus({ kind: "idle", msg: "" });
     } catch (e) {
@@ -437,9 +452,7 @@ export default function Swap() {
 
   const onSwap = async () => {
     if (!tokenIn || !tokenOut || !amountIn || !amountOut || !walletAddr || !window.ethereum) return;
-    const inA  = isNativeAddr(tokenInAddr)  ? wethAddr : tokenInAddr;
-    const outA = isNativeAddr(tokenOutAddr) ? wethAddr : tokenOutAddr;
-    const path = [inA, outA];
+    const path = buildSwapPath(tokenInAddr, tokenOutAddr, wethAddr);
 
     setBusy(true);
     setStatus({ kind: "info", msg: "Sending swap transaction…" });

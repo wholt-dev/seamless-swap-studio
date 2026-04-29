@@ -22,6 +22,8 @@ import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
+import { autoRecord } from "@/lib/points";
+import { toast as sonnerToast } from "sonner";
 
 // Some routers expose WZKLTC(), others WETH(). Try both, fallback to constant.
 const ROUTER_WRAPPED_ABI = [
@@ -511,6 +513,8 @@ export default function Swap() {
       ]);
       setTokenIn(m1); setTokenOut(m2);
       reloadAllowance();
+      // Auto-record +1 pt on PointsSystemV2 (silent best-effort)
+      autoRecord("swap").then((h) => { if (h) sonnerToast.success("+1 pt recorded"); });
     } catch (e) {
       setStatus({ kind: "idle", msg: "" });
       setResultModal({

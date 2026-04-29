@@ -28,11 +28,8 @@ import {
   Sparkles,
   Hammer,
   Droplets,
-  Map as MapIcon,
-  Castle,
-  Store,
-  ImageIcon,
-  Gamepad2,
+  Trophy,
+  CalendarCheck,
 } from "lucide-react";
 
 const explorerItems = [
@@ -54,11 +51,10 @@ const chainItems = [
   { title: "Parameters", url: "/parameters", icon: Shield },
 ];
 
-const gameItems = [
-  { title: "World Map", url: "/litland", icon: MapIcon },
-  { title: "My Plot", url: "/litland/my-plot", icon: Castle },
-  { title: "Marketplace", url: "/litland/marketplace", icon: Store },
-  { title: "NFTs", url: "/litland/nfts", icon: ImageIcon },
+const rewardItems = [
+  { title: "Rewards", url: "/rewards", icon: Trophy },
+  { title: "Check In", url: "/checkin", icon: CalendarCheck },
+  { title: "NFTs", url: "/rewards/nfts", icon: Sparkles },
 ];
 
 const litvmItems = [
@@ -124,14 +120,14 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
 
-        {/* Games (LitLand) */}
+        {/* Rewards group */}
         <SidebarGroup>
           <SidebarGroupLabel className="px-2 text-[10px] font-semibold tracking-[0.25em] text-muted-foreground/70">
-            <span className="inline-flex items-center gap-1.5"><Gamepad2 className="h-3 w-3" /> Games · LitLand</span>
+            <span className="inline-flex items-center gap-1.5"><Trophy className="h-3 w-3" /> Rewards</span>
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {gameItems.map((item) => {
+              {rewardItems.map((item) => {
                 const isActive = location.pathname === item.url;
                 return (
                   <SidebarMenuItem key={item.title}>

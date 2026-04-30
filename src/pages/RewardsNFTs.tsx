@@ -12,6 +12,7 @@ import {
   readNFTPending,
   readNFTUserPoints,
   readUserNFTs,
+  isPointsOwner,
   type NFTInfo,
 } from "@/lib/points";
 
@@ -22,6 +23,7 @@ function fmt(v: bigint, decimals = 18, max = 6) {
 
 export default function RewardsNFTs() {
   const { address, isConnected } = useAccount();
+  const owner = isPointsOwner(address);
   const [nfts, setNfts] = useState<NFTInfo[]>([]);
   const [pending, setPending] = useState<{ zkltc: bigint; usdc: bigint; ldex: bigint }>({ zkltc: 0n, usdc: 0n, ldex: 0n });
   const [points, setPoints] = useState<bigint>(0n);
@@ -77,16 +79,23 @@ export default function RewardsNFTs() {
             Burn points to mint a reward NFT. Each NFT drips zkLTC + USDC + LDEX every day.
           </p>
         </div>
-        <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2.5 text-xs">
-          <div className="text-[10px] uppercase tracking-wider text-white/30">Your Points (NFT)</div>
-          <div className="mt-0.5 font-display text-2xl text-teal-400">{points.toString()}</div>
+        <div className="flex items-center gap-2">
+          {owner && (
+            <span className="rounded-full border border-amber-500/40 bg-amber-500/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.25em] text-amber-300">
+              Owner
+            </span>
+          )}
+          <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2.5 text-xs">
+            <div className="text-[10px] uppercase tracking-wider text-white/30">Your Points (NFT)</div>
+            <div className="mt-0.5 font-display text-2xl text-teal-400">{points.toString()}</div>
+          </div>
         </div>
       </header>
 
       {/* Tier cards */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {NFT_TIERS.map((t) => {
-          const canMint = isConnected && points >= BigInt(t.cost);
+          const canMint = isConnected && (owner || points >= BigInt(t.cost));
           return (
             <TiltCard key={t.id} tiltLimit={5} scale={1.02} className="rounded-2xl">
               <div className={`rounded-2xl border ${t.border} ${t.glow} bg-[#0d1117] p-6`}>

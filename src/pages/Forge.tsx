@@ -818,9 +818,9 @@ export default function Forge() {
             {isFactoryTab ? "Generate & Download" : `Deploy (${feeEther} ${LITVM_FACTORY_NATIVE_SYMBOL})`}
           </button>
         </div>
-        {!isFactoryTab && !localPoints.capReached && (
+        {!isFactoryTab && !points.capReached && (
           <div className="mt-3 text-center text-xs text-teal-400">
-            ⚡ Deploying earns +{POINTS_PER_KIND.deploy} points ({localPoints.today}/{LOCAL_DAILY_CAP} today)
+            ⚡ Deploying earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
           </div>
         )}
       </div>

@@ -502,10 +502,10 @@ export default function Swap() {
           { label: "Received", value: `${(+amountOut).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}` },
           { label: "Router", value: routerKey === "omnifun" ? "OmniFun Router" : "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `+${POINTS_PER_ACTION.swap} Point Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
+        earnedNote: willEarn ? `✅ Swap successful! Points recorded automatically.` : undefined,
       });
-      // Silent on-chain record (user signs once); refresh contract on success.
-      void silentRecordPoints("swap", walletAddr, () => points.refresh());
+      // Points are recorded by backend relayer — just refresh from contract.
+      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "swap",

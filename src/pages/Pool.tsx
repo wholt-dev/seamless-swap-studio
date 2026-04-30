@@ -332,9 +332,9 @@ export default function Pool() {
           { label: tokenB?.symbol || "Token B", value: `${(+amountB).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenB?.symbol || ""}` },
           { label: "Router", value: "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `+${POINTS_PER_ACTION.lp} Points Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
+        earnedNote: willEarn ? `✅ Liquidity added! Points recorded automatically.` : undefined,
       });
-      void silentRecordPoints("lp", walletAddr, () => points.refresh());
+      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "liquidity",

@@ -2,7 +2,7 @@
 import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
 import { LITVM_CHAIN_ID, RPC_URL } from "./litvm";
 
-export const POINTS_SYSTEM_ADDRESS = "0x9E8777D55d906EAF032DEa524Ad26297309B624D";
+export const POINTS_SYSTEM_ADDRESS = "0xc09E9EA5706e4Fc956e4fC90f7792709a4bBB80B";
 export const DAILY_CHECKIN_ADDRESS = "0x338178EBf5Bc7ABa0d63a3D6b86c9F2490dE2De0";
 export const LITDEX_NFT_ADDRESS    = "0x1c6806d479071d3595ac0ad0f574aBbCa5290da4";
 export const LDEX_TOKEN_ADDRESS    = "0xBAaba603e6298fbb76325a6B0d47Cd57154ca641";

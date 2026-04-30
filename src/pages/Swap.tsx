@@ -21,7 +21,9 @@ import {
 import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { awardPoints, useLocalPoints, POINTS_PER_KIND, LOCAL_DAILY_CAP } from "@/lib/localPoints";
+import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
+import { silentRecordPoints } from "@/lib/silentRecord";
+import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 // Some routers expose WZKLTC(), others WETH(). Try both, fallback to constant.

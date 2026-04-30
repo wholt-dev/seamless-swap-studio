@@ -307,7 +307,7 @@ export default function Swap() {
   const [resultModal, setResultModal] = useState<{
     open: boolean; kind: TxResultKind; title: string; subtitle?: string; txHash?: string; details?: TxResultDetail[]; earnedNote?: string;
   }>({ open: false, kind: "ok", title: "" });
-  const localPoints = useLocalPoints(walletAddr);
+  const points = usePointsContract(walletAddr);
 
   // Load wrapped native address from router (try WZKLTC then WETH, fallback to constant)
   useEffect(() => {
@@ -488,8 +488,9 @@ export default function Swap() {
       const receipt = await tx.wait();
       const finalHash = receipt?.hash ?? tx.hash;
       setStatus({ kind: "idle", msg: "" });
-      const earned = awardPoints(walletAddr, "swap");
-      const afterToday = localPoints.today + earned;
+      const dailyBefore = Number(points.daily);
+      const willEarn = dailyBefore < DAILY_POINTS_CAP;
+      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.swap);
       setResultModal({
         open: true,
         kind: "ok",
@@ -501,8 +502,10 @@ export default function Swap() {
           { label: "Received", value: `${(+amountOut).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}` },
           { label: "Router", value: routerKey === "omnifun" ? "OmniFun Router" : "LitDeX Router" },
         ],
-        earnedNote: earned > 0 ? `+${earned} Point Earned! (${afterToday}/${LOCAL_DAILY_CAP} today)` : undefined,
+        earnedNote: willEarn ? `+${POINTS_PER_ACTION.swap} Point Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
       });
+      // Silent on-chain record (user signs once); refresh contract on success.
+      void silentRecordPoints("swap", walletAddr, () => points.refresh());
       pushWalletTx({
         hash: finalHash,
         kind: "swap",
@@ -742,9 +745,9 @@ export default function Swap() {
                   <span className="text-white/40">Network</span>
                   <span className="font-mono text-white/80">LitVM LiteForge</span>
                 </div>
-                {!localPoints.capReached && (
+                {!points.capReached && (
                   <div className="pt-1 text-center text-xs text-teal-400">
-                    ⚡ This swap earns +{POINTS_PER_KIND.swap} point ({localPoints.today}/{LOCAL_DAILY_CAP} today)
+                    ⚡ This swap earns +{POINTS_PER_ACTION.swap} point ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
                   </div>
                 )}
               </div>

@@ -25,7 +25,7 @@ import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
 import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-import { silentRecordPoints } from "@/lib/silentRecord";
+
 import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
@@ -332,9 +332,9 @@ export default function Pool() {
           { label: tokenB?.symbol || "Token B", value: `${(+amountB).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenB?.symbol || ""}` },
           { label: "Router", value: "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `+${POINTS_PER_ACTION.lp} Points Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
+        earnedNote: willEarn ? `✅ Liquidity added! Points recorded automatically.` : undefined,
       });
-      void silentRecordPoints("lp", walletAddr, () => points.refresh());
+      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "liquidity",

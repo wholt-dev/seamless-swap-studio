@@ -49,7 +49,7 @@ import {
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
 import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-import { silentRecordPoints } from "@/lib/silentRecord";
+
 import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
@@ -683,9 +683,9 @@ export default function Forge() {
           { label: "Name", value: contractName },
           { label: "Contract", value: deployedAddr, addressLink: true },
         ],
-        earnedNote: willEarn ? `+${POINTS_PER_ACTION.deploy} Points Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
+        earnedNote: willEarn ? `✅ Contract deployed! Points recorded automatically.` : undefined,
       });
-      void silentRecordPoints("deploy", address, () => points.refresh());
+      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash,
         kind: "deploy",

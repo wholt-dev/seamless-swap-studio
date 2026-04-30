@@ -22,7 +22,7 @@ import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
 import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-import { silentRecordPoints } from "@/lib/silentRecord";
+
 import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
@@ -502,10 +502,10 @@ export default function Swap() {
           { label: "Received", value: `${(+amountOut).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}` },
           { label: "Router", value: routerKey === "omnifun" ? "OmniFun Router" : "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `+${POINTS_PER_ACTION.swap} Point Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
+        earnedNote: willEarn ? `✅ Swap successful! Points recorded automatically.` : undefined,
       });
-      // Silent on-chain record (user signs once); refresh contract on success.
-      void silentRecordPoints("swap", walletAddr, () => points.refresh());
+      // Points are recorded by backend relayer — just refresh from contract.
+      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "swap",

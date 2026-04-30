@@ -33,7 +33,7 @@ import { toast } from "@/hooks/use-toast";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
 import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-import { silentRecordPoints } from "@/lib/silentRecord";
+
 import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
@@ -402,9 +402,9 @@ export default function Deploy() {
           { label: "Supply", value: Number(form.totalSupply).toLocaleString() },
           ...(tokenAddr ? [{ label: "Contract", value: tokenAddr, addressLink: true } as TxResultDetail] : []),
         ],
-        earnedNote: willEarn ? `+${POINTS_PER_ACTION.deploy} Points Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
+        earnedNote: willEarn ? `✅ Token deployed! Points recorded automatically.` : undefined,
       });
-      void silentRecordPoints("deploy", address, () => points.refresh());
+      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: tx.hash,
         kind: "deploy",

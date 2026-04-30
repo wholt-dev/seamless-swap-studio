@@ -48,7 +48,9 @@ import {
 } from "@/lib/forgeTemplates";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { awardPoints, useLocalPoints, POINTS_PER_KIND, LOCAL_DAILY_CAP } from "@/lib/localPoints";
+import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
+import { silentRecordPoints } from "@/lib/silentRecord";
+import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 type DeployStatus =
@@ -506,7 +508,7 @@ export default function Forge() {
   }>({ open: false, kind: "ok", title: "" });
 
   const { address, isConnected } = useAccount();
-  const localPoints = useLocalPoints(address);
+  const points = usePointsContract(address);
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { data: walletClient } = useWalletClient();
@@ -667,8 +669,9 @@ export default function Forge() {
       if (!deployedAddr) throw new Error("Deployment confirmed but contract address not found in logs.");
       setDeploy({ kind: "ok", tx: hash, address: deployedAddr });
       setShowDeploy(false);
-      const earned = awardPoints(address, "deploy");
-      const afterToday = localPoints.today + earned;
+      const dailyBefore = Number(points.daily);
+      const willEarn = dailyBefore < DAILY_POINTS_CAP;
+      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.deploy);
       setResultModal({
         open: true,
         kind: "ok",
@@ -680,8 +683,9 @@ export default function Forge() {
           { label: "Name", value: contractName },
           { label: "Contract", value: deployedAddr, addressLink: true },
         ],
-        earnedNote: earned > 0 ? `+${earned} Points Earned! (${afterToday}/${LOCAL_DAILY_CAP} today)` : undefined,
+        earnedNote: willEarn ? `+${POINTS_PER_ACTION.deploy} Points Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
       });
+      void silentRecordPoints("deploy", address, () => points.refresh());
       pushWalletTx({
         hash,
         kind: "deploy",

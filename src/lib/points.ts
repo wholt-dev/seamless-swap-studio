@@ -169,6 +169,34 @@ export async function autoRecord(kind: "swap" | "lp" | "deploy"): Promise<string
   try { return await recordAction(kind); } catch { return undefined; }
 }
 
+/** Owner wallet — bypasses NFT mint point checks on the frontend. */
+export const POINTS_OWNER_ADDRESS = "0x3BC6348E1E569E97Bd8247b093475A4aC22B9fD4";
+export function isPointsOwner(addr?: string | null): boolean {
+  return !!addr && addr.toLowerCase() === POINTS_OWNER_ADDRESS.toLowerCase();
+}
+
+/** Silently auto-register the URL `?ref=` referrer once per wallet (idempotent). */
+export async function autoRegisterReferralIfNeeded(addr: string): Promise<void> {
+  if (typeof window === "undefined") return;
+  try {
+    const sp = new URLSearchParams(window.location.search);
+    const ref = sp.get("ref");
+    if (!ref || ref.toLowerCase() === addr.toLowerCase()) return;
+    const key = `litdex_ref_registered_${addr.toLowerCase()}`;
+    if (window.localStorage.getItem(key)) return;
+    await registerReferral(ref);
+    window.localStorage.setItem(key, "1");
+  } catch {
+    /* silent — referral is best-effort */
+  }
+}
+
+/** Points awarded per action kind (mirrors contract logic for UI preview). */
+export const POINTS_PER_ACTION: Record<"swap" | "lp" | "deploy", number> = {
+  swap: 1, lp: 2, deploy: 3,
+};
+
+
 /** NFT tier metadata for UI */
 export const NFT_TIERS = [
   { id: 1 as const, name: "Common",  cost: 1000,  rewards: { zkltc: "0.0001", usdc: "10",  ldex: "2"  }, border: "border-white/15", glow: "" },

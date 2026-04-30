@@ -32,7 +32,9 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { toast } from "@/hooks/use-toast";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { awardPoints, useLocalPoints, POINTS_PER_KIND, LOCAL_DAILY_CAP } from "@/lib/localPoints";
+import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
+import { silentRecordPoints } from "@/lib/silentRecord";
+import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 type Status =
@@ -241,7 +243,7 @@ export default function Deploy() {
   const [resultModal, setResultModal] = useState<{
     open: boolean; kind: TxResultKind; title: string; subtitle?: string; txHash?: string; details?: TxResultDetail[]; earnedNote?: string;
   }>({ open: false, kind: "ok", title: "" });
-  const localPoints = useLocalPoints(address);
+  const points = usePointsContract(address);
 
   const onLitVM = chainId === TOKEN_FACTORY_CHAIN_ID;
 
@@ -385,8 +387,9 @@ export default function Deploy() {
         tokenAddr,
       });
       setShowModal(false);
-      const earned = awardPoints(address, "deploy");
-      const afterToday = localPoints.today + earned;
+      const dailyBefore = Number(points.daily);
+      const willEarn = dailyBefore < DAILY_POINTS_CAP;
+      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.deploy);
       setResultModal({
         open: true,
         kind: "ok",
@@ -399,8 +402,9 @@ export default function Deploy() {
           { label: "Supply", value: Number(form.totalSupply).toLocaleString() },
           ...(tokenAddr ? [{ label: "Contract", value: tokenAddr, addressLink: true } as TxResultDetail] : []),
         ],
-        earnedNote: earned > 0 ? `+${earned} Points Earned! (${afterToday}/${LOCAL_DAILY_CAP} today)` : undefined,
+        earnedNote: willEarn ? `+${POINTS_PER_ACTION.deploy} Points Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
       });
+      void silentRecordPoints("deploy", address, () => points.refresh());
       pushWalletTx({
         hash: tx.hash,
         kind: "deploy",
@@ -723,9 +727,9 @@ export default function Deploy() {
                     Deploy Token
                   </button>
 
-                  {!localPoints.capReached && (
+                  {!points.capReached && (
                     <div className="text-center text-xs text-teal-400">
-                      ⚡ Deploying earns +{POINTS_PER_KIND.deploy} points ({localPoints.today}/{LOCAL_DAILY_CAP} today)
+                      ⚡ Deploying earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
                     </div>
                   )}
 

@@ -24,7 +24,9 @@ import {
 import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { awardPoints, useLocalPoints, POINTS_PER_KIND, LOCAL_DAILY_CAP } from "@/lib/localPoints";
+import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
+import { silentRecordPoints } from "@/lib/silentRecord";
+import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 type TokenMeta = { address: string; symbol: string; decimals: number; balance: string };
@@ -179,7 +181,7 @@ export default function Pool() {
   const [resultModal, setResultModal] = useState<{
     open: boolean; kind: TxResultKind; title: string; subtitle?: string; txHash?: string; details?: TxResultDetail[]; earnedNote?: string;
   }>({ open: false, kind: "ok", title: "" });
-  const localPoints = useLocalPoints(walletAddr);
+  const points = usePointsContract(walletAddr);
 
   const ensureChain = useCallback(async () => {
     if (chainId !== LITVM_CHAIN_ID) await switchChainAsync({ chainId: LITVM_CHAIN_ID });
@@ -316,8 +318,9 @@ export default function Pool() {
       const receipt = await tx.wait();
       const finalHash = receipt?.hash ?? tx.hash;
       setStatus({ kind: "idle", msg: "" });
-      const earned = awardPoints(walletAddr, "lp");
-      const afterToday = localPoints.today + earned;
+      const dailyBefore = Number(points.daily);
+      const willEarn = dailyBefore < DAILY_POINTS_CAP;
+      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.lp);
       setResultModal({
         open: true,
         kind: "ok",
@@ -329,8 +332,9 @@ export default function Pool() {
           { label: tokenB?.symbol || "Token B", value: `${(+amountB).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenB?.symbol || ""}` },
           { label: "Router", value: "LitDeX Router" },
         ],
-        earnedNote: earned > 0 ? `+${earned} Points Earned! (${afterToday}/${LOCAL_DAILY_CAP} today)` : undefined,
+        earnedNote: willEarn ? `+${POINTS_PER_ACTION.lp} Points Earned! (${projectedToday}/${DAILY_POINTS_CAP} today)` : undefined,
       });
+      void silentRecordPoints("lp", walletAddr, () => points.refresh());
       pushWalletTx({
         hash: finalHash,
         kind: "liquidity",
@@ -624,9 +628,9 @@ export default function Pool() {
                 >
                   {busy ? "Working…" : "Add Liquidity"}
                 </button>
-                {!localPoints.capReached && (
+                {!points.capReached && (
                   <div className="pt-1 text-center text-xs text-teal-400">
-                    ⚡ Adding liquidity earns +{POINTS_PER_KIND.lp} points ({localPoints.today}/{LOCAL_DAILY_CAP} today)
+                    ⚡ Adding liquidity earns +{POINTS_PER_ACTION.lp} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
                   </div>
                 )}
               </>

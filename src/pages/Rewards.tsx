@@ -5,16 +5,14 @@ import { toast } from "sonner";
 import { TiltCard } from "@/components/TiltCard";
 import { EXPLORER_URL, shortAddr, errMsg } from "@/lib/litvm";
 import {
-  DAILY_POINTS_CAP,
   POINTS_SYSTEM_ADDRESS,
   claimReferralPoints,
-  readPendingReferral,
-  readPoints,
-  readReferrals,
   recordAction,
-  registerReferral,
+  autoRegisterReferralIfNeeded,
 } from "@/lib/points";
-import { useLocalPoints, LOCAL_DAILY_CAP } from "@/lib/localPoints";
+import { usePointsContract, DAILY_POINTS_CAP, msUntilIstMidnight, fmtCountdown } from "@/hooks/usePointsContract";
+
+const REFERRAL_ORIGIN = "https://litdex.test-hub.xyz";
 
 function StatPill({ label, value }: { label: string; value: string | number }) {
   return (
@@ -25,64 +23,16 @@ function StatPill({ label, value }: { label: string; value: string | number }) {
   );
 }
 
-/** Time remaining until next 00:00 IST (UTC+5:30) */
-function nextIstMidnightMs() {
-  const now = new Date();
-  const istNow = new Date(now.getTime() + (5.5 * 60 - now.getTimezoneOffset()) * 60 * 1000);
-  const ist = new Date(istNow);
-  ist.setUTCHours(0, 0, 0, 0);
-  ist.setUTCDate(ist.getUTCDate() + 1);
-  return ist.getTime() - (5.5 * 60 - now.getTimezoneOffset()) * 60 * 1000;
-}
-function fmtCountdown(ms: number) {
-  const s = Math.max(0, Math.floor(ms / 1000));
-  const h = Math.floor(s / 3600);
-  const m = Math.floor((s % 3600) / 60);
-  const sec = s % 60;
-  return `${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:${String(sec).padStart(2, "0")}`;
-}
-
 export default function Rewards() {
   const { address, isConnected } = useAccount();
-  const localPoints = useLocalPoints(address);
-  const [total, setTotal] = useState<bigint>(0n);
-  const [daily, setDaily] = useState<bigint>(0n);
-  const [pending, setPending] = useState<bigint>(0n);
-  const [refs, setRefs] = useState<string[]>([]);
+  const { total, daily, pending, referrals, refresh, capReached } = usePointsContract(address);
   const [busy, setBusy] = useState<string | null>(null);
-
-  const refresh = useCallback(async () => {
-    if (!address) { setTotal(0n); setDaily(0n); setPending(0n); setRefs([]); return; }
-    try {
-      const [p, pend, rs] = await Promise.all([
-        readPoints(address),
-        readPendingReferral(address),
-        readReferrals(address).catch(() => [] as string[]),
-      ]);
-      setTotal(p.total); setDaily(p.daily); setPending(pend); setRefs(rs);
-    } catch (e) { console.warn("rewards read failed", e); }
-  }, [address]);
-
-  useEffect(() => { refresh(); }, [refresh]);
 
   // Auto-register referral from ?ref= once wallet is connected
   useEffect(() => {
     if (!address) return;
-    const sp = new URLSearchParams(window.location.search);
-    const ref = sp.get("ref");
-    if (!ref || ref.toLowerCase() === address.toLowerCase()) return;
-    const key = `litdex_ref_registered_${address.toLowerCase()}`;
-    if (localStorage.getItem(key)) return;
-    (async () => {
-      try {
-        await registerReferral(ref);
-        localStorage.setItem(key, "1");
-        toast.success("Referral linked", { description: shortAddr(ref) });
-      } catch (e) {
-        console.warn("registerReferral failed", e);
-      }
-    })();
-  }, [address]);
+    autoRegisterReferralIfNeeded(address).then(() => refresh());
+  }, [address, refresh]);
 
   const action = async (kind: "swap" | "lp" | "deploy") => {
     setBusy(kind);
@@ -91,7 +41,7 @@ export default function Rewards() {
       toast.success(`${kind === "swap" ? "+1" : kind === "lp" ? "+2" : "+3"} pt recorded`, {
         description: shortAddr(hash),
       });
-      refresh();
+      await refresh();
     } catch (e) {
       toast.error("Record failed", { description: errMsg(e).slice(0, 140) });
     } finally { setBusy(null); }
@@ -102,24 +52,32 @@ export default function Rewards() {
     try {
       const hash = await claimReferralPoints();
       toast.success("Referral points claimed", { description: shortAddr(hash) });
-      refresh();
+      await refresh();
     } catch (e) {
       toast.error("Claim failed", { description: errMsg(e).slice(0, 140) });
     } finally { setBusy(null); }
   };
 
-  const refLink = address ? `${window.location.origin}/swap?ref=${address}` : "";
+  const refLink = address ? `${REFERRAL_ORIGIN}/swap?ref=${address}` : "";
   const dailyNum = Number(daily);
   const pct = Math.min(100, (dailyNum / DAILY_POINTS_CAP) * 100);
-  const capReached = dailyNum >= DAILY_POINTS_CAP;
 
-  // Live IST countdown
+  // Live IST countdown — recomputed every second from UTC clock
   const [now, setNow] = useState(Date.now());
   useEffect(() => {
     const t = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(t);
   }, []);
-  const countdown = useMemo(() => fmtCountdown(nextIstMidnightMs() - now), [now]);
+  const countdown = useMemo(() => fmtCountdown(msUntilIstMidnight(new Date(now))), [now]);
+
+  // When the IST day rolls over (countdown reaches 0), force a contract refresh.
+  const prevCountdownRef = useState<string>("")[0];
+  useEffect(() => {
+    if (countdown === "00:00:00") {
+      refresh();
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [countdown.startsWith("00:00:0")]);
 
   return (
     <div className="space-y-8">
@@ -145,20 +103,20 @@ export default function Rewards() {
         </a>
       </header>
 
-      {/* Points Card */}
+      {/* Points Card — contract values only */}
       <TiltCard tiltLimit={4} scale={1.01} className="rounded-2xl">
         <div className="rounded-2xl border border-white/[0.07] bg-[#0d1117] p-6 md:p-8">
           <div className="flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="text-[10px] uppercase tracking-widest text-white/40">Total Points</div>
               <div className="mt-1 font-display text-6xl text-teal-400">{total.toString()}</div>
+              <div className="mt-1 text-[11px] text-white/30">on-chain · PointsSystemV2</div>
             </div>
             <div className="flex flex-wrap gap-2.5">
               <StatPill label="Daily" value={`${dailyNum} / ${DAILY_POINTS_CAP}`} />
-              <StatPill label="Today (Local)" value={`${localPoints.today} / ${LOCAL_DAILY_CAP}`} />
-              <StatPill label="Lifetime (Local)" value={localPoints.total} />
+              <StatPill label="Lifetime" value={total.toString()} />
               <StatPill label="Pending Referral" value={pending.toString()} />
-              <StatPill label="Referrals" value={refs.length} />
+              <StatPill label="Referrals" value={referrals.length} />
             </div>
           </div>
 
@@ -248,9 +206,9 @@ export default function Rewards() {
           </div>
 
           <div className="mt-4 grid grid-cols-2 gap-3 sm:grid-cols-3">
-            <StatPill label="Total Referrals" value={refs.length} />
+            <StatPill label="Total Referrals" value={referrals.length} />
             <StatPill label="Pending Points" value={pending.toString()} />
-            <StatPill label="Status" value={refs.length > 0 ? "Active" : "—"} />
+            <StatPill label="Status" value={referrals.length > 0 ? "Active" : "—"} />
           </div>
         </div>
       </TiltCard>

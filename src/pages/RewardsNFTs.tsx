@@ -127,7 +127,7 @@ export default function RewardsNFTs() {
                 >
                   {busy === `mint-${t.id}` ? <><Loader2 className="h-4 w-4 animate-spin" /> Minting…</> : `Mint ${t.name}`}
                 </button>
-                {!canMint && isConnected && (
+                {!canMint && isConnected && !owner && (
                   <div className="mt-2 text-center text-[11px] text-white/30">
                     Need {(BigInt(t.cost) - points).toString()} more points
                   </div>

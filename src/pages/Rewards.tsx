@@ -65,14 +65,15 @@ export default function Rewards() {
               <div className="mt-1 text-[11px] text-white/30">on-chain · PointsSystemV4</div>
             </div>
             <div className="flex flex-wrap gap-2.5">
-              <StatPill label="Daily" value={`${dailyNum} / ${DAILY_POINTS_CAP}`} />
+              <StatPill label="Deploy daily" value={`${dailyNum} / ${DAILY_POINTS_CAP} pts`} />
+              <StatPill label="Check-in bonus" value="+10 / day" />
               <StatPill label="Lifetime" value={total.toString()} />
             </div>
           </div>
 
           <div className="mt-5">
             <div className="mb-1 flex items-center justify-between text-[11px] text-white/40">
-              <span>Daily cap progress</span>
+              <span>Deploy daily cap (check-in +10 not counted)</span>
               <span className="font-mono">{pct.toFixed(0)}%</span>
             </div>
             <div className="h-2 w-full overflow-hidden rounded-full bg-white/[0.05]">
@@ -84,13 +85,14 @@ export default function Rewards() {
             <div className="mt-6 flex flex-col items-center gap-2 rounded-xl border border-orange-500/40 bg-orange-500/10 p-5 text-center">
               <Clock className="h-6 w-6 text-orange-300" />
               <div className="font-display text-base text-white">
-                Daily limit reached ({DAILY_POINTS_CAP}/{DAILY_POINTS_CAP} pts)
+                Deploy cap reached ({DAILY_POINTS_CAP}/{DAILY_POINTS_CAP} pts)
               </div>
+              <div className="text-xs text-white/60">Daily check-in still earns +10 bonus pts separately.</div>
               <div className="font-mono text-xs text-white/60">Resets in {countdown} (00:00 IST)</div>
             </div>
           ) : (
             <div className="mt-3 text-[11px] text-white/40">
-              {dailyNum}/{DAILY_POINTS_CAP} points used today · resets in <span className="font-mono text-white/60">{countdown}</span>
+              {dailyNum}/{DAILY_POINTS_CAP} deploy pts used today · check-in +10 is separate · resets in <span className="font-mono text-white/60">{countdown}</span>
             </div>
           )}
         </div>

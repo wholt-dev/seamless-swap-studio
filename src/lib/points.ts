@@ -2,7 +2,7 @@
 import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
 import { LITVM_CHAIN_ID, RPC_URL } from "./litvm";
 
-export const POINTS_SYSTEM_ADDRESS = "0x085020a0ea8e4Dc6Ce926477e10f07e65d48acC2";
+export const POINTS_SYSTEM_ADDRESS = "0xd985D5042906D94AC482e1e1B60121aC8cc3d162";
 
 // LitDeXDeployer — token deployment now goes through this contract; backend
 // relayer auto-credits +5 points per deploy on PointsSystemV4.
@@ -11,7 +11,7 @@ export const LITDEX_DEPLOYER_ABI = [
   "function deployToken(string _name, string _symbol, uint256 _supply) returns (address)",
   "event TokenDeployed(address indexed deployer, address indexed token, string symbol)",
 ] as const;
-export const DAILY_CHECKIN_ADDRESS = "0x338178EBf5Bc7ABa0d63a3D6b86c9F2490dE2De0";
+export const DAILY_CHECKIN_ADDRESS = "0xBFcdf8b8bb7e779E382c65ca171fa1ee603E9BEa";
 export const LITDEX_NFT_ADDRESS    = "0x1c6806d479071d3595ac0ad0f574aBbCa5290da4";
 export const LDEX_TOKEN_ADDRESS    = "0xBAaba603e6298fbb76325a6B0d47Cd57154ca641";
 export const USDC_TOKEN_ADDRESS    = "0x60DD65bAd8a73Dfd8DF029C4e3b372d575B03BC2";

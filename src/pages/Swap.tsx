@@ -488,9 +488,6 @@ export default function Swap() {
       const receipt = await tx.wait();
       const finalHash = receipt?.hash ?? tx.hash;
       setStatus({ kind: "idle", msg: "" });
-      const dailyBefore = Number(points.daily);
-      const willEarn = dailyBefore < DAILY_POINTS_CAP;
-      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.swap);
       setResultModal({
         open: true,
         kind: "ok",
@@ -502,10 +499,7 @@ export default function Swap() {
           { label: "Received", value: `${(+amountOut).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}` },
           { label: "Router", value: routerKey === "omnifun" ? "OmniFun Router" : "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `✅ Swap successful! Points recorded automatically.` : undefined,
       });
-      // Points are recorded by backend relayer — just refresh from contract.
-      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "swap",
@@ -745,11 +739,6 @@ export default function Swap() {
                   <span className="text-white/40">Network</span>
                   <span className="font-mono text-white/80">LitVM LiteForge</span>
                 </div>
-                {!points.capReached && (
-                  <div className="pt-1 text-center text-xs text-teal-400">
-                    ⚡ This swap earns +{POINTS_PER_ACTION.swap} point ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
-                  </div>
-                )}
               </div>
             )}
 

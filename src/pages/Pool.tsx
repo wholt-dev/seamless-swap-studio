@@ -318,9 +318,6 @@ export default function Pool() {
       const receipt = await tx.wait();
       const finalHash = receipt?.hash ?? tx.hash;
       setStatus({ kind: "idle", msg: "" });
-      const dailyBefore = Number(points.daily);
-      const willEarn = dailyBefore < DAILY_POINTS_CAP;
-      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.lp);
       setResultModal({
         open: true,
         kind: "ok",
@@ -332,9 +329,7 @@ export default function Pool() {
           { label: tokenB?.symbol || "Token B", value: `${(+amountB).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenB?.symbol || ""}` },
           { label: "Router", value: "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `✅ Liquidity added! Points recorded automatically.` : undefined,
       });
-      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "liquidity",
@@ -628,11 +623,6 @@ export default function Pool() {
                 >
                   {busy ? "Working…" : "Add Liquidity"}
                 </button>
-                {!points.capReached && (
-                  <div className="pt-1 text-center text-xs text-teal-400">
-                    ⚡ Adding liquidity earns +{POINTS_PER_ACTION.lp} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
-                  </div>
-                )}
               </>
             ) : (
               <>

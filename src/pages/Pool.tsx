@@ -24,9 +24,6 @@ import {
 import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-
-import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 type TokenMeta = { address: string; symbol: string; decimals: number; balance: string };

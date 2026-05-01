@@ -21,9 +21,6 @@ import {
 import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-
-import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 // Some routers expose WZKLTC(), others WETH(). Try both, fallback to constant.
@@ -307,7 +304,7 @@ export default function Swap() {
   const [resultModal, setResultModal] = useState<{
     open: boolean; kind: TxResultKind; title: string; subtitle?: string; txHash?: string; details?: TxResultDetail[]; earnedNote?: string;
   }>({ open: false, kind: "ok", title: "" });
-  const points = usePointsContract(walletAddr);
+  
 
   // Load wrapped native address from router (try WZKLTC then WETH, fallback to constant)
   useEffect(() => {
@@ -488,9 +485,6 @@ export default function Swap() {
       const receipt = await tx.wait();
       const finalHash = receipt?.hash ?? tx.hash;
       setStatus({ kind: "idle", msg: "" });
-      const dailyBefore = Number(points.daily);
-      const willEarn = dailyBefore < DAILY_POINTS_CAP;
-      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.swap);
       setResultModal({
         open: true,
         kind: "ok",
@@ -502,10 +496,7 @@ export default function Swap() {
           { label: "Received", value: `${(+amountOut).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenOut.symbol}` },
           { label: "Router", value: routerKey === "omnifun" ? "OmniFun Router" : "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `✅ Swap successful! Points recorded automatically.` : undefined,
       });
-      // Points are recorded by backend relayer — just refresh from contract.
-      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "swap",
@@ -745,11 +736,6 @@ export default function Swap() {
                   <span className="text-white/40">Network</span>
                   <span className="font-mono text-white/80">LitVM LiteForge</span>
                 </div>
-                {!points.capReached && (
-                  <div className="pt-1 text-center text-xs text-teal-400">
-                    ⚡ This swap earns +{POINTS_PER_ACTION.swap} point ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
-                  </div>
-                )}
               </div>
             )}
 

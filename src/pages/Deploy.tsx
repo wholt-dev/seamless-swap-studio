@@ -34,7 +34,11 @@ import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
 import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
 
-import { POINTS_PER_ACTION } from "@/lib/points";
+import {
+  POINTS_PER_ACTION,
+  LITDEX_DEPLOYER_ADDRESS,
+  LITDEX_DEPLOYER_ABI,
+} from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 type Status =
@@ -348,32 +352,28 @@ export default function Deploy() {
       setStatus({ kind: "info", msg: "Preparing transaction…" });
       const provider = new BrowserProvider(eth as unknown as ConstructorParameters<typeof BrowserProvider>[0]);
       const signer = await provider.getSigner();
-      const factory = new Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, signer);
+      const deployer = new Contract(LITDEX_DEPLOYER_ADDRESS, LITDEX_DEPLOYER_ABI, signer);
 
-      const fee = (await factory.deployFee()) as bigint;
-
-      setStatus({ kind: "info", msg: `Deploying ${form.symbol}… confirm in wallet (${formatUnits(fee, 18)} zkLTC fee)` });
-      const tx = await factory.deployToken(
+      setStatus({ kind: "info", msg: `Deploying ${form.symbol}… confirm in wallet` });
+      // LitDeXDeployer signature: deployToken(string name, string symbol, uint256 supply)
+      // Contract handles the 1e18 multiplication internally — pass whole units.
+      const tx = await deployer.deployToken(
         form.name.trim(),
         form.symbol.trim(),
-        parseInt(form.decimals, 10),
         BigInt(form.totalSupply),
-        form.mintable,
-        form.burnable,
-        form.pausable,
-        { value: fee }
       );
       setStatus({ kind: "info", msg: `Tx submitted: ${tx.hash.slice(0, 10)}… waiting for confirmation` });
 
       const receipt = await tx.wait();
 
+      // Extract deployed token address from TokenDeployed event.
       let tokenAddr: string | undefined;
       try {
         for (const log of receipt?.logs ?? []) {
           try {
-            const parsed = factory.interface.parseLog(log);
+            const parsed = deployer.interface.parseLog(log);
             if (parsed?.name === "TokenDeployed") {
-              tokenAddr = parsed.args[0] as string;
+              tokenAddr = parsed.args[1] as string; // (deployer, token, symbol)
               break;
             }
           } catch { /* ignore */ }
@@ -389,7 +389,6 @@ export default function Deploy() {
       setShowModal(false);
       const dailyBefore = Number(points.daily);
       const willEarn = dailyBefore < DAILY_POINTS_CAP;
-      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.deploy);
       setResultModal({
         open: true,
         kind: "ok",
@@ -402,8 +401,11 @@ export default function Deploy() {
           { label: "Supply", value: Number(form.totalSupply).toLocaleString() },
           ...(tokenAddr ? [{ label: "Contract", value: tokenAddr, addressLink: true } as TxResultDetail] : []),
         ],
-        earnedNote: willEarn ? `✅ Token deployed! Points recorded automatically.` : undefined,
+        earnedNote: willEarn
+          ? `✅ Token deployed! +${POINTS_PER_ACTION.deploy} points earned automatically.`
+          : `✅ Token deployed! Daily point limit reached (${DAILY_POINTS_CAP}/${DAILY_POINTS_CAP}).`,
       });
+      // Backend relayer credits points on PointsSystemV4 — give it a moment, then refresh.
       setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: tx.hash,
@@ -413,7 +415,12 @@ export default function Deploy() {
         time: Date.now(),
         account: address,
       });
-      toast({ title: "Token deployed!", description: `${form.symbol} live on LitVM` });
+      toast({
+        title: "Token deployed!",
+        description: willEarn
+          ? `${form.symbol} live on LitVM · +${POINTS_PER_ACTION.deploy} points earned automatically`
+          : `${form.symbol} live on LitVM`,
+      });
       setForm(DEFAULT_FORM);
       setStep(1);
       setRefreshKey((k) => k + 1);
@@ -466,7 +473,7 @@ export default function Deploy() {
             <span className="text-gradient-aurora">Deploy ERC-20</span>
           </h1>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            Launch your token in seconds · {deployFee} zkLTC fee · LitVM testnet
+            Launch your token in seconds · earn +{POINTS_PER_ACTION.deploy} points · LitVM testnet
           </p>
         </div>
 
@@ -476,12 +483,12 @@ export default function Deploy() {
             <div className="mt-0.5 font-display text-2xl text-white">{totalDeployed ?? "—"}</div>
           </div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2.5 text-xs">
-            <div className="text-[10px] uppercase tracking-wider text-white/30">Factory</div>
+            <div className="text-[10px] uppercase tracking-wider text-white/30">Deployer</div>
             <button
-              onClick={() => copyText(TOKEN_FACTORY_ADDRESS, "Factory address copied")}
+              onClick={() => copyText(LITDEX_DEPLOYER_ADDRESS, "Deployer address copied")}
               className="mt-0.5 flex items-center gap-1 font-mono text-sm text-white/70 hover:text-white"
             >
-              {shortAddr(TOKEN_FACTORY_ADDRESS)}
+              {shortAddr(LITDEX_DEPLOYER_ADDRESS)}
               <Copy className="h-3 w-3" />
             </button>
           </div>
@@ -708,13 +715,13 @@ export default function Deploy() {
                     </div>
                   </div>
 
-                  {/* Fee section */}
-                  <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 p-4">
+                  {/* Points reward section */}
+                  <div className="flex items-center justify-between rounded-xl border border-teal-500/30 bg-teal-500/10 p-4">
                     <div>
-                      <div className="text-xs text-white/40">Deployment Fee</div>
-                      <div className="font-display text-xl text-primary">{deployFee} zkLTC</div>
+                      <div className="text-xs text-white/40">Points Reward</div>
+                      <div className="font-display text-xl text-teal-300">+{POINTS_PER_ACTION.deploy} points</div>
                     </div>
-                    <Coins className="h-6 w-6 text-primary/60" />
+                    <Coins className="h-6 w-6 text-teal-400/70" />
                   </div>
 
                   {/* Deploy button */}
@@ -727,14 +734,18 @@ export default function Deploy() {
                     Deploy Token
                   </button>
 
-                  {!points.capReached && (
+                  {points.capReached ? (
+                    <div className="text-center text-xs text-orange-300">
+                      Daily point limit reached ({DAILY_POINTS_CAP}/{DAILY_POINTS_CAP})
+                    </div>
+                  ) : (
                     <div className="text-center text-xs text-teal-400">
-                      ⚡ Deploying earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
+                      ⚡ Deploy earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
                     </div>
                   )}
 
                   <div className="text-center text-[11px] text-white/30">
-                    A non-refundable deployment fee of {deployFee} zkLTC will be charged on confirmation.
+                    Deploys via LitDeXDeployer · points credited automatically by relayer.
                   </div>
 
                   <div className="flex justify-start pt-2">

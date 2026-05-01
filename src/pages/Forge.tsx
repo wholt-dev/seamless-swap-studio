@@ -48,9 +48,6 @@ import {
 } from "@/lib/forgeTemplates";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-
-import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 type DeployStatus =
@@ -508,7 +505,7 @@ export default function Forge() {
   }>({ open: false, kind: "ok", title: "" });
 
   const { address, isConnected } = useAccount();
-  const points = usePointsContract(address);
+  
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { data: walletClient } = useWalletClient();
@@ -669,9 +666,6 @@ export default function Forge() {
       if (!deployedAddr) throw new Error("Deployment confirmed but contract address not found in logs.");
       setDeploy({ kind: "ok", tx: hash, address: deployedAddr });
       setShowDeploy(false);
-      const dailyBefore = Number(points.daily);
-      const willEarn = dailyBefore < DAILY_POINTS_CAP;
-      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.deploy);
       setResultModal({
         open: true,
         kind: "ok",
@@ -683,9 +677,7 @@ export default function Forge() {
           { label: "Name", value: contractName },
           { label: "Contract", value: deployedAddr, addressLink: true },
         ],
-        earnedNote: willEarn ? `✅ Contract deployed! Points recorded automatically.` : undefined,
       });
-      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash,
         kind: "deploy",
@@ -818,11 +810,6 @@ export default function Forge() {
             {isFactoryTab ? "Generate & Download" : `Deploy (${feeEther} ${LITVM_FACTORY_NATIVE_SYMBOL})`}
           </button>
         </div>
-        {!isFactoryTab && !points.capReached && (
-          <div className="mt-3 text-center text-xs text-teal-400">
-            ⚡ Deploying earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
-          </div>
-        )}
       </div>
       </TiltCard>
 

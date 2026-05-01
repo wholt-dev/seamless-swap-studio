@@ -24,9 +24,6 @@ import {
 import { resolveLogo, resolveSymbol } from "@/lib/tokenMeta";
 import { TiltCard } from "@/components/TiltCard";
 import { TxResultModal, type TxResultKind, type TxResultDetail } from "@/components/TxResultModal";
-import { usePointsContract, DAILY_POINTS_CAP } from "@/hooks/usePointsContract";
-
-import { POINTS_PER_ACTION } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
 type TokenMeta = { address: string; symbol: string; decimals: number; balance: string };
@@ -181,7 +178,7 @@ export default function Pool() {
   const [resultModal, setResultModal] = useState<{
     open: boolean; kind: TxResultKind; title: string; subtitle?: string; txHash?: string; details?: TxResultDetail[]; earnedNote?: string;
   }>({ open: false, kind: "ok", title: "" });
-  const points = usePointsContract(walletAddr);
+  
 
   const ensureChain = useCallback(async () => {
     if (chainId !== LITVM_CHAIN_ID) await switchChainAsync({ chainId: LITVM_CHAIN_ID });
@@ -318,9 +315,6 @@ export default function Pool() {
       const receipt = await tx.wait();
       const finalHash = receipt?.hash ?? tx.hash;
       setStatus({ kind: "idle", msg: "" });
-      const dailyBefore = Number(points.daily);
-      const willEarn = dailyBefore < DAILY_POINTS_CAP;
-      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.lp);
       setResultModal({
         open: true,
         kind: "ok",
@@ -332,9 +326,7 @@ export default function Pool() {
           { label: tokenB?.symbol || "Token B", value: `${(+amountB).toLocaleString(undefined, { maximumFractionDigits: 6 })} ${tokenB?.symbol || ""}` },
           { label: "Router", value: "LitDeX Router" },
         ],
-        earnedNote: willEarn ? `✅ Liquidity added! Points recorded automatically.` : undefined,
       });
-      setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: finalHash,
         kind: "liquidity",
@@ -628,11 +620,6 @@ export default function Pool() {
                 >
                   {busy ? "Working…" : "Add Liquidity"}
                 </button>
-                {!points.capReached && (
-                  <div className="pt-1 text-center text-xs text-teal-400">
-                    ⚡ Adding liquidity earns +{POINTS_PER_ACTION.lp} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
-                  </div>
-                )}
               </>
             ) : (
               <>

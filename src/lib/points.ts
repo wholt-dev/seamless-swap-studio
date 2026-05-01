@@ -2,7 +2,15 @@
 import { BrowserProvider, Contract, JsonRpcProvider } from "ethers";
 import { LITVM_CHAIN_ID, RPC_URL } from "./litvm";
 
-export const POINTS_SYSTEM_ADDRESS = "0xc09E9EA5706e4Fc956e4fC90f7792709a4bBB80B";
+export const POINTS_SYSTEM_ADDRESS = "0x085020a0ea8e4Dc6Ce926477e10f07e65d48acC2";
+
+// LitDeXDeployer — token deployment now goes through this contract; backend
+// relayer auto-credits +5 points per deploy on PointsSystemV4.
+export const LITDEX_DEPLOYER_ADDRESS = "0xb9ADc189545e066c453f8C4492C521db93B37014";
+export const LITDEX_DEPLOYER_ABI = [
+  "function deployToken(string _name, string _symbol, uint256 _supply) returns (address)",
+  "event TokenDeployed(address indexed deployer, address indexed token, string symbol)",
+] as const;
 export const DAILY_CHECKIN_ADDRESS = "0x338178EBf5Bc7ABa0d63a3D6b86c9F2490dE2De0";
 export const LITDEX_NFT_ADDRESS    = "0x1c6806d479071d3595ac0ad0f574aBbCa5290da4";
 export const LDEX_TOKEN_ADDRESS    = "0xBAaba603e6298fbb76325a6B0d47Cd57154ca641";
@@ -191,9 +199,10 @@ export async function autoRegisterReferralIfNeeded(addr: string): Promise<void> 
   }
 }
 
-/** Points awarded per action kind (mirrors contract logic for UI preview). */
+/** Points awarded per action kind (mirrors PointsSystemV4 logic).
+ *  Only deploy and daily check-in (handled separately) earn points now. */
 export const POINTS_PER_ACTION: Record<"swap" | "lp" | "deploy", number> = {
-  swap: 1, lp: 2, deploy: 3,
+  swap: 0, lp: 0, deploy: 5,
 };
 
 

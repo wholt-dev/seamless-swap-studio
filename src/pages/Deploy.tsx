@@ -352,32 +352,28 @@ export default function Deploy() {
       setStatus({ kind: "info", msg: "Preparing transaction…" });
       const provider = new BrowserProvider(eth as unknown as ConstructorParameters<typeof BrowserProvider>[0]);
       const signer = await provider.getSigner();
-      const factory = new Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, signer);
+      const deployer = new Contract(LITDEX_DEPLOYER_ADDRESS, LITDEX_DEPLOYER_ABI, signer);
 
-      const fee = (await factory.deployFee()) as bigint;
-
-      setStatus({ kind: "info", msg: `Deploying ${form.symbol}… confirm in wallet (${formatUnits(fee, 18)} zkLTC fee)` });
-      const tx = await factory.deployToken(
+      setStatus({ kind: "info", msg: `Deploying ${form.symbol}… confirm in wallet` });
+      // LitDeXDeployer signature: deployToken(string name, string symbol, uint256 supply)
+      // Contract handles the 1e18 multiplication internally — pass whole units.
+      const tx = await deployer.deployToken(
         form.name.trim(),
         form.symbol.trim(),
-        parseInt(form.decimals, 10),
         BigInt(form.totalSupply),
-        form.mintable,
-        form.burnable,
-        form.pausable,
-        { value: fee }
       );
       setStatus({ kind: "info", msg: `Tx submitted: ${tx.hash.slice(0, 10)}… waiting for confirmation` });
 
       const receipt = await tx.wait();
 
+      // Extract deployed token address from TokenDeployed event.
       let tokenAddr: string | undefined;
       try {
         for (const log of receipt?.logs ?? []) {
           try {
-            const parsed = factory.interface.parseLog(log);
+            const parsed = deployer.interface.parseLog(log);
             if (parsed?.name === "TokenDeployed") {
-              tokenAddr = parsed.args[0] as string;
+              tokenAddr = parsed.args[1] as string; // (deployer, token, symbol)
               break;
             }
           } catch { /* ignore */ }
@@ -393,7 +389,6 @@ export default function Deploy() {
       setShowModal(false);
       const dailyBefore = Number(points.daily);
       const willEarn = dailyBefore < DAILY_POINTS_CAP;
-      const projectedToday = Math.min(DAILY_POINTS_CAP, dailyBefore + POINTS_PER_ACTION.deploy);
       setResultModal({
         open: true,
         kind: "ok",
@@ -406,8 +401,11 @@ export default function Deploy() {
           { label: "Supply", value: Number(form.totalSupply).toLocaleString() },
           ...(tokenAddr ? [{ label: "Contract", value: tokenAddr, addressLink: true } as TxResultDetail] : []),
         ],
-        earnedNote: willEarn ? `✅ Token deployed! Points recorded automatically.` : undefined,
+        earnedNote: willEarn
+          ? `✅ Token deployed! +${POINTS_PER_ACTION.deploy} points earned automatically.`
+          : `✅ Token deployed! Daily point limit reached (${DAILY_POINTS_CAP}/${DAILY_POINTS_CAP}).`,
       });
+      // Backend relayer credits points on PointsSystemV4 — give it a moment, then refresh.
       setTimeout(() => { void points.refresh(); }, 4000);
       pushWalletTx({
         hash: tx.hash,
@@ -417,7 +415,12 @@ export default function Deploy() {
         time: Date.now(),
         account: address,
       });
-      toast({ title: "Token deployed!", description: `${form.symbol} live on LitVM` });
+      toast({
+        title: "Token deployed!",
+        description: willEarn
+          ? `${form.symbol} live on LitVM · +${POINTS_PER_ACTION.deploy} points earned automatically`
+          : `${form.symbol} live on LitVM`,
+      });
       setForm(DEFAULT_FORM);
       setStep(1);
       setRefreshKey((k) => k + 1);

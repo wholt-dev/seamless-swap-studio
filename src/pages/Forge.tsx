@@ -505,7 +505,7 @@ export default function Forge() {
   }>({ open: false, kind: "ok", title: "" });
 
   const { address, isConnected } = useAccount();
-  const points = usePointsContract(address);
+  
   const chainId = useChainId();
   const { switchChainAsync } = useSwitchChain();
   const { data: walletClient } = useWalletClient();

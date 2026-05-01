@@ -178,7 +178,7 @@ export default function Pool() {
   const [resultModal, setResultModal] = useState<{
     open: boolean; kind: TxResultKind; title: string; subtitle?: string; txHash?: string; details?: TxResultDetail[]; earnedNote?: string;
   }>({ open: false, kind: "ok", title: "" });
-  const points = usePointsContract(walletAddr);
+  
 
   const ensureChain = useCallback(async () => {
     if (chainId !== LITVM_CHAIN_ID) await switchChainAsync({ chainId: LITVM_CHAIN_ID });

@@ -304,7 +304,7 @@ export default function Swap() {
   const [resultModal, setResultModal] = useState<{
     open: boolean; kind: TxResultKind; title: string; subtitle?: string; txHash?: string; details?: TxResultDetail[]; earnedNote?: string;
   }>({ open: false, kind: "ok", title: "" });
-  const points = usePointsContract(walletAddr);
+  
 
   // Load wrapped native address from router (try WZKLTC then WETH, fallback to constant)
   useEffect(() => {

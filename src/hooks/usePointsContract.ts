@@ -1,5 +1,5 @@
 // Cheat-proof points hook: contract is the source of truth.
-// Polls PointsSystemV2.getPoints every 10s, exposes refresh() for post-tx invalidation.
+// Polls PointsSystemV4.getPoints every 10s, exposes refresh() for post-tx invalidation.
 import { useCallback, useEffect, useRef, useState } from "react";
 import {
   readPoints,

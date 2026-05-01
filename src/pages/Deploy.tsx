@@ -473,7 +473,7 @@ export default function Deploy() {
             <span className="text-gradient-aurora">Deploy ERC-20</span>
           </h1>
           <p className="mt-2 max-w-md text-sm text-muted-foreground">
-            Launch your token in seconds · {deployFee} zkLTC fee · LitVM testnet
+            Launch your token in seconds · earn +{POINTS_PER_ACTION.deploy} points · LitVM testnet
           </p>
         </div>
 
@@ -483,12 +483,12 @@ export default function Deploy() {
             <div className="mt-0.5 font-display text-2xl text-white">{totalDeployed ?? "—"}</div>
           </div>
           <div className="rounded-xl border border-white/[0.07] bg-white/[0.03] px-4 py-2.5 text-xs">
-            <div className="text-[10px] uppercase tracking-wider text-white/30">Factory</div>
+            <div className="text-[10px] uppercase tracking-wider text-white/30">Deployer</div>
             <button
-              onClick={() => copyText(TOKEN_FACTORY_ADDRESS, "Factory address copied")}
+              onClick={() => copyText(LITDEX_DEPLOYER_ADDRESS, "Deployer address copied")}
               className="mt-0.5 flex items-center gap-1 font-mono text-sm text-white/70 hover:text-white"
             >
-              {shortAddr(TOKEN_FACTORY_ADDRESS)}
+              {shortAddr(LITDEX_DEPLOYER_ADDRESS)}
               <Copy className="h-3 w-3" />
             </button>
           </div>

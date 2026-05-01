@@ -715,13 +715,13 @@ export default function Deploy() {
                     </div>
                   </div>
 
-                  {/* Fee section */}
-                  <div className="flex items-center justify-between rounded-xl border border-primary/30 bg-primary/10 p-4">
+                  {/* Points reward section */}
+                  <div className="flex items-center justify-between rounded-xl border border-teal-500/30 bg-teal-500/10 p-4">
                     <div>
-                      <div className="text-xs text-white/40">Deployment Fee</div>
-                      <div className="font-display text-xl text-primary">{deployFee} zkLTC</div>
+                      <div className="text-xs text-white/40">Points Reward</div>
+                      <div className="font-display text-xl text-teal-300">+{POINTS_PER_ACTION.deploy} points</div>
                     </div>
-                    <Coins className="h-6 w-6 text-primary/60" />
+                    <Coins className="h-6 w-6 text-teal-400/70" />
                   </div>
 
                   {/* Deploy button */}
@@ -734,14 +734,18 @@ export default function Deploy() {
                     Deploy Token
                   </button>
 
-                  {!points.capReached && (
+                  {points.capReached ? (
+                    <div className="text-center text-xs text-orange-300">
+                      Daily point limit reached ({DAILY_POINTS_CAP}/{DAILY_POINTS_CAP})
+                    </div>
+                  ) : (
                     <div className="text-center text-xs text-teal-400">
-                      ⚡ Deploying earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
+                      ⚡ Deploy earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
                     </div>
                   )}
 
                   <div className="text-center text-[11px] text-white/30">
-                    A non-refundable deployment fee of {deployFee} zkLTC will be charged on confirmation.
+                    Deploys via LitDeXDeployer · points credited automatically by relayer.
                   </div>
 
                   <div className="flex justify-start pt-2">

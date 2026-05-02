@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BrowserProvider, Contract, JsonRpcProvider, formatUnits } from "ethers";
+import { BrowserProvider, Contract, JsonRpcProvider, formatUnits, parseEther } from "ethers";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import {
   Rocket,
@@ -38,6 +38,8 @@ import {
   POINTS_PER_ACTION,
   LITDEX_DEPLOYER_ADDRESS,
   LITDEX_DEPLOYER_ABI,
+  DEPLOY_COUNT_BASE,
+  DEPLOY_FEE_ZKLTC,
 } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 
@@ -260,14 +262,15 @@ export default function Deploy() {
       try {
         const provider = new JsonRpcProvider(TOKEN_FACTORY_RPC);
         const factory = new Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, provider);
+        const deployerRead = new Contract(LITDEX_DEPLOYER_ADDRESS, LITDEX_DEPLOYER_ABI, provider);
 
-        const [fee, total] = await Promise.all([
+        const [fee, deployerTotal] = await Promise.all([
           factory.deployFee() as Promise<bigint>,
-          factory.getTotalDeployed() as Promise<bigint>,
+          deployerRead.totalDeployed().catch(() => 0n) as Promise<bigint>,
         ]);
         if (cancelled) return;
         setDeployFee(formatUnits(fee, 18));
-        setTotalDeployed(Number(total));
+        setTotalDeployed(DEPLOY_COUNT_BASE + Number(deployerTotal));
 
         const all = (await factory.getAllTokens()) as string[];
         const recent = all.slice(-20).reverse();
@@ -355,12 +358,14 @@ export default function Deploy() {
       const deployer = new Contract(LITDEX_DEPLOYER_ADDRESS, LITDEX_DEPLOYER_ABI, signer);
 
       setStatus({ kind: "info", msg: `Deploying ${form.symbol}… confirm in wallet` });
-      // LitDeXDeployer signature: deployToken(string name, string symbol, uint256 supply)
+      // LitDeXDeployer signature: deployToken(string name, string symbol, uint256 supply) payable
       // Contract handles the 1e18 multiplication internally — pass whole units.
+      // Requires 0.05 zkLTC fee per deploy.
       const tx = await deployer.deployToken(
         form.name.trim(),
         form.symbol.trim(),
         BigInt(form.totalSupply),
+        { value: parseEther(DEPLOY_FEE_ZKLTC) },
       );
       setStatus({ kind: "info", msg: `Tx submitted: ${tx.hash.slice(0, 10)}… waiting for confirmation` });
 
@@ -402,8 +407,8 @@ export default function Deploy() {
           ...(tokenAddr ? [{ label: "Contract", value: tokenAddr, addressLink: true } as TxResultDetail] : []),
         ],
         earnedNote: willEarn
-          ? `✅ Token deployed! +${POINTS_PER_ACTION.deploy} points earned automatically.`
-          : `✅ Token deployed! Daily point limit reached (${DAILY_POINTS_CAP}/${DAILY_POINTS_CAP}).`,
+          ? `+${POINTS_PER_ACTION.deploy} points earned automatically`
+          : `Daily point limit reached (${DAILY_POINTS_CAP}/${DAILY_POINTS_CAP})`,
       });
       // Backend relayer credits points on PointsSystemV4 — give it a moment, then refresh.
       setTimeout(() => { void points.refresh(); }, 4000);
@@ -734,13 +739,17 @@ export default function Deploy() {
                     Deploy Token
                   </button>
 
+                  <div className="text-center text-xs font-medium text-teal-300">
+                    {DEPLOY_FEE_ZKLTC} zkLTC fee per deploy
+                  </div>
+
                   {points.capReached ? (
                     <div className="text-center text-xs text-orange-300">
                       Daily point limit reached ({DAILY_POINTS_CAP}/{DAILY_POINTS_CAP})
                     </div>
                   ) : (
                     <div className="text-center text-xs text-teal-400">
-                      ⚡ Deploy earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
+                      ⚡ +{POINTS_PER_ACTION.deploy} points earned automatically ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
                     </div>
                   )}
 

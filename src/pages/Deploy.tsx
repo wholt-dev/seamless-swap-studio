@@ -38,6 +38,8 @@ import {
   POINTS_PER_ACTION,
   LITDEX_DEPLOYER_ADDRESS,
   LITDEX_DEPLOYER_ABI,
+  DEPLOY_COUNT_BASE,
+  DEPLOY_FEE_ZKLTC,
 } from "@/lib/points";
 import { pushWalletTx } from "@/hooks/useWalletHistory";
 

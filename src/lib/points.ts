@@ -178,7 +178,12 @@ export async function readNFTPending(user: string): Promise<{ zkltc: bigint; usd
 
 export async function readNFTUserPoints(user: string): Promise<bigint> {
   const c = new Contract(LITDEX_NFT_ADDRESS, LITDEX_NFT_ABI as never, readProvider);
-  return BigInt(await c.userPoints(user));
+}
+
+export async function readNFTTotalMinted(nftType: 1 | 2 | 3): Promise<number> {
+  const c = new Contract(LITDEX_NFT_ADDRESS, LITDEX_NFT_ABI as never, readProvider);
+  const v = await c.totalMinted(nftType);
+  return Number(v);
 }
 
 /** Auto-record helper: silent best-effort, returns hash or undefined */

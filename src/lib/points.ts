@@ -17,7 +17,7 @@ export const DEPLOY_COUNT_BASE = 323;
 /** Required fee (in zkLTC) per token deploy on the new LitDeXDeployer. */
 export const DEPLOY_FEE_ZKLTC = "0.05";
 export const DAILY_CHECKIN_ADDRESS = "0xBFcdf8b8bb7e779E382c65ca171fa1ee603E9BEa";
-export const LITDEX_NFT_ADDRESS    = "0x1c6806d479071d3595ac0ad0f574aBbCa5290da4";
+export const LITDEX_NFT_ADDRESS    = "0x63C40F0F6A7D4AcE71f6Ccaf1BB588De9701b251";
 export const LDEX_TOKEN_ADDRESS    = "0xBAaba603e6298fbb76325a6B0d47Cd57154ca641";
 export const USDC_TOKEN_ADDRESS    = "0x60DD65bAd8a73Dfd8DF029C4e3b372d575B03BC2";
 

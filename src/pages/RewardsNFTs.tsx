@@ -11,6 +11,7 @@ import {
   mintRewardNFT,
   readNFTPending,
   readNFTUserPoints,
+  readNFTTotalMinted,
   readUserNFTs,
   isPointsOwner,
   type NFTInfo,
@@ -27,9 +28,17 @@ export default function RewardsNFTs() {
   const [nfts, setNfts] = useState<NFTInfo[]>([]);
   const [pending, setPending] = useState<{ zkltc: bigint; usdc: bigint; ldex: bigint }>({ zkltc: 0n, usdc: 0n, ldex: 0n });
   const [points, setPoints] = useState<bigint>(0n);
+  const [minted, setMinted] = useState<Record<1 | 2 | 3, number>>({ 1: 0, 2: 0, 3: 0 });
   const [busy, setBusy] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
+    const [m1, m2, m3] = await Promise.all([
+      readNFTTotalMinted(1).catch(() => 0),
+      readNFTTotalMinted(2).catch(() => 0),
+      readNFTTotalMinted(3).catch(() => 0),
+    ]);
+    setMinted({ 1: m1, 2: m2, 3: m3 });
+
     if (!address) { setNfts([]); setPending({ zkltc: 0n, usdc: 0n, ldex: 0n }); setPoints(0n); return; }
     try {
       const [list, pend, pts] = await Promise.all([
@@ -95,43 +104,79 @@ export default function RewardsNFTs() {
       {/* Tier cards */}
       <div className="grid grid-cols-1 gap-5 md:grid-cols-3">
         {NFT_TIERS.map((t) => {
-          const canMint = isConnected && (owner || points >= BigInt(t.cost));
+          const mintedCount = minted[t.id];
+          const soldOut = mintedCount >= t.maxSupply;
+          const enoughPoints = owner || points >= BigInt(t.cost);
+          const canMint = isConnected && enoughPoints && !soldOut;
+          const pct = Math.min(100, (mintedCount / t.maxSupply) * 100);
           return (
             <TiltCard key={t.id} tiltLimit={5} scale={1.02} className="rounded-2xl">
-              <div className={`rounded-2xl border ${t.border} ${t.glow} bg-[#0d1117] p-6`}>
-                <div className="flex items-center justify-between">
-                  <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
-                    <Gem className="h-3 w-3" /> {t.name}
-                  </div>
-                  <div className="text-[10px] text-white/30">Tier {t.id}</div>
-                </div>
-                <h3 className="mt-3 font-display text-3xl text-white">{t.name} NFT</h3>
-                <div className="mt-1 text-xs text-white/40">Mint cost: <span className="font-mono text-teal-300">{t.cost.toLocaleString()} pts</span></div>
-
-                <div className="mt-5 space-y-1.5 rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 text-xs">
-                  <div className="flex items-center justify-between"><span className="text-white/40">Daily zkLTC</span><span className="font-mono text-white">{t.rewards.zkltc}</span></div>
-                  <div className="flex items-center justify-between"><span className="text-white/40">Daily USDC</span><span className="font-mono text-white">{t.rewards.usdc}</span></div>
-                  <div className="flex items-center justify-between"><span className="text-white/40">Daily LDEX</span><span className="font-mono text-white">{t.rewards.ldex}</span></div>
+              <div className={`overflow-hidden rounded-2xl border ${t.border} ${t.glow} bg-[#0d1117]`}>
+                {/* NFT image */}
+                <div className="relative h-[200px] w-full overflow-hidden bg-black/40">
+                  <img
+                    src={t.image}
+                    alt={`${t.name} NFT`}
+                    className={`h-full w-full object-cover animate-nft-float ${t.imageGlow}`}
+                    style={{ animationDelay: t.floatDelay }}
+                    loading="lazy"
+                  />
+                  <div className="pointer-events-none absolute inset-0 bg-gradient-to-t from-[#0d1117] via-transparent to-transparent" />
                 </div>
 
-                <button
-                  onClick={() => onMint(t.id)}
-                  disabled={!canMint || busy === `mint-${t.id}`}
-                  className={`mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-sm font-semibold tracking-wide transition-colors disabled:opacity-50 ${
-                    t.id === 3
-                      ? "border-purple-400/60 bg-purple-500/15 text-purple-200 hover:bg-purple-500/25"
-                      : t.id === 2
-                      ? "border-blue-400/60 bg-blue-500/15 text-blue-200 hover:bg-blue-500/25"
-                      : "border-white/15 bg-white/5 text-white/80 hover:bg-white/10"
-                  }`}
-                >
-                  {busy === `mint-${t.id}` ? <><Loader2 className="h-4 w-4 animate-spin" /> Minting…</> : `Mint ${t.name}`}
-                </button>
-                {!canMint && isConnected && !owner && (
-                  <div className="mt-2 text-center text-[11px] text-white/30">
-                    Need {(BigInt(t.cost) - points).toString()} more points
+                <div className="p-6">
+                  <div className="flex items-center justify-between">
+                    <div className="inline-flex items-center gap-2 text-[10px] uppercase tracking-widest text-white/40">
+                      <Gem className="h-3 w-3" /> {t.name}
+                    </div>
+                    <div className="text-[10px] text-white/30">Tier {t.id}</div>
                   </div>
-                )}
+                  <h3 className="mt-3 font-display text-3xl text-white">{t.name} NFT</h3>
+                  <div className="mt-1 text-xs text-white/40">Mint cost: <span className="font-mono text-teal-300">{t.cost.toLocaleString()} pts</span></div>
+
+                  <div className="mt-5 space-y-1.5 rounded-xl border border-white/[0.07] bg-white/[0.03] p-3 text-xs">
+                    <div className="flex items-center justify-between"><span className="text-white/40">Daily zkLTC</span><span className="font-mono text-white">{t.rewards.zkltc}</span></div>
+                    <div className="flex items-center justify-between"><span className="text-white/40">Daily USDC</span><span className="font-mono text-white">{t.rewards.usdc}</span></div>
+                    <div className="flex items-center justify-between"><span className="text-white/40">Daily LDEX</span><span className="font-mono text-white">{t.rewards.ldex}</span></div>
+                  </div>
+
+                  <button
+                    onClick={() => onMint(t.id)}
+                    disabled={!canMint || busy === `mint-${t.id}`}
+                    className={`mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl border text-sm font-semibold tracking-wide transition-colors disabled:opacity-50 ${
+                      soldOut
+                        ? "border-white/10 bg-white/5 text-white/40"
+                        : t.id === 3
+                        ? "border-purple-400/60 bg-purple-500/15 text-purple-200 hover:bg-purple-500/25"
+                        : t.id === 2
+                        ? "border-blue-400/60 bg-blue-500/15 text-blue-200 hover:bg-blue-500/25"
+                        : "border-teal-400/50 bg-teal-500/15 text-teal-200 hover:bg-teal-500/25"
+                    }`}
+                  >
+                    {busy === `mint-${t.id}`
+                      ? <><Loader2 className="h-4 w-4 animate-spin" /> Minting…</>
+                      : soldOut
+                      ? "Sold Out"
+                      : `Mint ${t.name}`}
+                  </button>
+
+                  {/* Supply progress */}
+                  <div className="mt-3">
+                    <div className="flex items-center justify-between text-[11px] text-white/40">
+                      <span>{mintedCount.toLocaleString()} / {t.maxSupply.toLocaleString()} minted</span>
+                      <span>{pct.toFixed(1)}%</span>
+                    </div>
+                    <div className="mt-1 h-1 w-full overflow-hidden rounded-full bg-white/[0.06]">
+                      <div className={`h-full ${t.barColor} transition-all`} style={{ width: `${pct}%` }} />
+                    </div>
+                  </div>
+
+                  {!enoughPoints && isConnected && !owner && !soldOut && (
+                    <div className="mt-2 text-center text-[11px] text-white/30">
+                      Need {(BigInt(t.cost) - points).toString()} more points
+                    </div>
+                  )}
+                </div>
               </div>
             </TiltCard>
           );
@@ -175,17 +220,24 @@ export default function RewardsNFTs() {
           <div className="mt-5">
             {nfts.length === 0 ? (
               <div className="rounded-xl border border-dashed border-white/10 bg-white/[0.02] py-10 text-center text-sm text-white/40">
-                No NFTs yet. Mint one above to start earning daily.
+                No NFTs yet. Earn points and mint one!
               </div>
             ) : (
               <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 md:grid-cols-4">
                 {nfts.map((n, idx) => {
                   const tier = NFT_TIERS[Math.max(0, Math.min(2, n.nftType - 1))];
                   return (
-                    <div key={idx} className={`rounded-xl border ${tier.border} ${tier.glow} bg-white/[0.02] p-4`}>
-                      <div className="text-[10px] uppercase tracking-wider text-white/40">{tier.name}</div>
-                      <div className="mt-1 font-display text-lg text-white">#{idx + 1}</div>
-                      <div className="mt-1 text-[10px] text-white/30">last claim day: {n.lastClaimDay.toString()}</div>
+                    <div key={idx} className={`overflow-hidden rounded-xl border ${tier.border} ${tier.glow} bg-white/[0.02]`}>
+                      <div className="relative h-24 w-full overflow-hidden bg-black/30">
+                        <img src={tier.image} alt={tier.name} className="h-full w-full object-cover" loading="lazy" />
+                      </div>
+                      <div className="p-3">
+                        <span className={`inline-block rounded-full border ${tier.border} bg-white/[0.04] px-2 py-0.5 text-[9px] uppercase tracking-wider text-white/70`}>
+                          {tier.name}
+                        </span>
+                        <div className="mt-1 font-display text-base text-white">#{idx + 1}</div>
+                        <div className="mt-0.5 text-[10px] text-white/30">last claim: {n.lastClaimDay.toString()}</div>
+                      </div>
                     </div>
                   );
                 })}

@@ -17,7 +17,7 @@ export const DEPLOY_COUNT_BASE = 323;
 /** Required fee (in zkLTC) per token deploy on the new LitDeXDeployer. */
 export const DEPLOY_FEE_ZKLTC = "0.05";
 export const DAILY_CHECKIN_ADDRESS = "0xBFcdf8b8bb7e779E382c65ca171fa1ee603E9BEa";
-export const LITDEX_NFT_ADDRESS    = "0x1c6806d479071d3595ac0ad0f574aBbCa5290da4";
+export const LITDEX_NFT_ADDRESS    = "0x63C40F0F6A7D4AcE71f6Ccaf1BB588De9701b251";
 export const LDEX_TOKEN_ADDRESS    = "0xBAaba603e6298fbb76325a6B0d47Cd57154ca641";
 export const USDC_TOKEN_ADDRESS    = "0x60DD65bAd8a73Dfd8DF029C4e3b372d575B03BC2";
 
@@ -48,6 +48,7 @@ export const DAILY_CHECKIN_ABI = [
 export const LITDEX_NFT_ABI = [
   { inputs: [{ name: "nftType", type: "uint8" }], name: "mintNFT", outputs: [], stateMutability: "nonpayable", type: "function" },
   { inputs: [], name: "claimRewards", outputs: [], stateMutability: "nonpayable", type: "function" },
+  { inputs: [{ name: "", type: "uint8" }], name: "totalMinted", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
   { inputs: [{ name: "user", type: "address" }], name: "getPendingRewards", outputs: [
     { name: "zkltc", type: "uint256" },
     { name: "usdc", type: "uint256" },
@@ -62,6 +63,9 @@ export const LITDEX_NFT_ABI = [
   }], stateMutability: "view", type: "function" },
   { inputs: [{ name: "user", type: "address" }], name: "userPoints", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
 ] as const;
+
+/** Max supply per NFT tier (index 0=Common, 1=Rare, 2=Epic). */
+export const NFT_MAX_SUPPLY: Record<1 | 2 | 3, number> = { 1: 9999, 2: 4999, 3: 999 };
 
 export const readProvider = new JsonRpcProvider(RPC_URL);
 
@@ -177,6 +181,12 @@ export async function readNFTUserPoints(user: string): Promise<bigint> {
   return BigInt(await c.userPoints(user));
 }
 
+export async function readNFTTotalMinted(nftType: 1 | 2 | 3): Promise<number> {
+  const c = new Contract(LITDEX_NFT_ADDRESS, LITDEX_NFT_ABI as never, readProvider);
+  const v = await c.totalMinted(nftType);
+  return Number(v);
+}
+
 /** Auto-record helper: silent best-effort, returns hash or undefined */
 export async function autoRecord(kind: "swap" | "lp" | "deploy"): Promise<string | undefined> {
   try { return await recordAction(kind); } catch { return undefined; }
@@ -213,7 +223,7 @@ export const POINTS_PER_ACTION: Record<"swap" | "lp" | "deploy", number> = {
 
 /** NFT tier metadata for UI */
 export const NFT_TIERS = [
-  { id: 1 as const, name: "Common",  cost: 1000,  rewards: { zkltc: "0.0001", usdc: "10",  ldex: "2"  }, border: "border-white/15", glow: "" },
-  { id: 2 as const, name: "Rare",    cost: 5000,  rewards: { zkltc: "0.0005", usdc: "50",  ldex: "10" }, border: "border-blue-400/50", glow: "shadow-[0_0_24px_-6px_rgba(96,165,250,0.5)]" },
-  { id: 3 as const, name: "Epic",    cost: 10000, rewards: { zkltc: "0.001",  usdc: "100", ldex: "20" }, border: "border-purple-400/60", glow: "shadow-[0_0_28px_-4px_rgba(168,85,247,0.55)]" },
+  { id: 1 as const, name: "Common",  cost: 1000,  rewards: { zkltc: "0.0001", usdc: "10",  ldex: "2"  }, border: "border-teal-400/40",   glow: "shadow-[0_0_24px_-6px_rgba(45,212,191,0.55)]", image: "/logos/common_nft.png", imageGlow: "shadow-[0_0_30px_-4px_rgba(45,212,191,0.7)]", floatDelay: "0s",   barColor: "bg-teal-400",   maxSupply: 9999 },
+  { id: 2 as const, name: "Rare",    cost: 5000,  rewards: { zkltc: "0.0005", usdc: "50",  ldex: "10" }, border: "border-blue-400/50",   glow: "shadow-[0_0_24px_-6px_rgba(96,165,250,0.55)]", image: "/logos/rare_nft.png",   imageGlow: "shadow-[0_0_30px_-4px_rgba(96,165,250,0.7)]", floatDelay: "0.5s", barColor: "bg-blue-400",   maxSupply: 4999 },
+  { id: 3 as const, name: "Epic",    cost: 10000, rewards: { zkltc: "0.001",  usdc: "100", ldex: "20" }, border: "border-purple-400/60", glow: "shadow-[0_0_28px_-4px_rgba(168,85,247,0.55)]", image: "/logos/epic_nft.jpg",   imageGlow: "shadow-[0_0_30px_-4px_rgba(168,85,247,0.7)]", floatDelay: "1s",   barColor: "bg-purple-400", maxSupply: 999  },
 ];

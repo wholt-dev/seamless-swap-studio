@@ -407,8 +407,8 @@ export default function Deploy() {
           ...(tokenAddr ? [{ label: "Contract", value: tokenAddr, addressLink: true } as TxResultDetail] : []),
         ],
         earnedNote: willEarn
-          ? `✅ Token deployed! +${POINTS_PER_ACTION.deploy} points earned automatically.`
-          : `✅ Token deployed! Daily point limit reached (${DAILY_POINTS_CAP}/${DAILY_POINTS_CAP}).`,
+          ? `+${POINTS_PER_ACTION.deploy} points earned automatically`
+          : `Daily point limit reached (${DAILY_POINTS_CAP}/${DAILY_POINTS_CAP})`,
       });
       // Backend relayer credits points on PointsSystemV4 — give it a moment, then refresh.
       setTimeout(() => { void points.refresh(); }, 4000);

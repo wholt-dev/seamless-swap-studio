@@ -185,6 +185,12 @@
 .animate-scale-in { animation: scale-in 0.25s ease-out; }
 .animate-pop-in   { animation: pop-in 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 
+@keyframes nft-float {
+  0%, 100% { transform: translateY(0px); }
+  50%      { transform: translateY(-10px); }
+}
+.animate-nft-float { animation: nft-float 3s ease-in-out infinite; }
+
 /* Scroll-reveal — used with useScrollReveal hook */
 .reveal {
   opacity: 0;

@@ -739,13 +739,17 @@ export default function Deploy() {
                     Deploy Token
                   </button>
 
+                  <div className="text-center text-xs font-medium text-teal-300">
+                    {DEPLOY_FEE_ZKLTC} zkLTC fee per deploy
+                  </div>
+
                   {points.capReached ? (
                     <div className="text-center text-xs text-orange-300">
                       Daily point limit reached ({DAILY_POINTS_CAP}/{DAILY_POINTS_CAP})
                     </div>
                   ) : (
                     <div className="text-center text-xs text-teal-400">
-                      ⚡ Deploy earns +{POINTS_PER_ACTION.deploy} points ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
+                      ⚡ +{POINTS_PER_ACTION.deploy} points earned automatically ({Number(points.daily)}/{DAILY_POINTS_CAP} today)
                     </div>
                   )}
 

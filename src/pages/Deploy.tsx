@@ -272,7 +272,7 @@ export default function Deploy() {
         setDeployFee(formatUnits(fee, 18));
         setTotalDeployed(DEPLOY_COUNT_BASE + Number(deployerTotal));
 
-        const all = (await factory.getAllTokens()) as string[];
+        const all = (await factory.getAllTokens().catch(() => [])) as string[];
         const recent = all.slice(-20).reverse();
         const infos = await Promise.all(
           recent.map(async (addr) => {
@@ -285,35 +285,73 @@ export default function Deploy() {
         setAllTokens(allInfos);
 
         if (address) {
-          let mineAddrs: string[] = [];
+          // 1. From factory (legacy path)
+          let factoryMine: TokenInfo[] = [];
           try {
-            mineAddrs = (await factory.getTokensByCreator(address)) as string[];
+            const mineAddrs = (await factory.getTokensByCreator(address)) as string[];
+            if (mineAddrs.length > 0) {
+              factoryMine = (
+                await Promise.all(
+                  mineAddrs.map(async (addr) => {
+                    try { return (await factory.getTokenInfo(addr)) as TokenInfo; }
+                    catch { return null; }
+                  })
+                )
+              ).filter((i): i is TokenInfo => i !== null);
+            }
           } catch { /* ignore */ }
 
-          let myInfos: TokenInfo[];
-          if (mineAddrs.length > 0) {
-            myInfos = (
-              await Promise.all(
-                mineAddrs.map(async (addr) => {
-                  try { return (await factory.getTokenInfo(addr)) as TokenInfo; }
-                  catch { return null; }
-                })
-              )
-            ).filter((i): i is TokenInfo => i !== null);
-          } else {
-            const fullInfos = await Promise.all(
-              all.map(async (addr) => {
-                try { return (await factory.getTokenInfo(addr)) as TokenInfo; }
-                catch { return null; }
+          // 2. From LitDeXDeployer TokenDeployed events (current path)
+          let deployerMine: TokenInfo[] = [];
+          try {
+            const filter = deployerRead.filters.TokenDeployed(address);
+            const logs = await deployerRead.queryFilter(filter, 0, "latest");
+            deployerMine = await Promise.all(
+              logs.map(async (log) => {
+                const args = (log as unknown as { args: unknown[] }).args;
+                const tokenAddr = args[1] as string;
+                const sym = args[2] as string;
+                let name = sym;
+                let decimals = 18;
+                let supply: bigint = 0n;
+                try {
+                  const tk = new Contract(tokenAddr, CUSTOM_TOKEN_ABI, provider);
+                  const [n, d, s] = await Promise.all([
+                    tk.name().catch(() => sym),
+                    tk.decimals().catch(() => 18),
+                    tk.totalSupply().catch(() => 0n),
+                  ]);
+                  name = n as string;
+                  decimals = Number(d);
+                  supply = BigInt(s as bigint);
+                } catch { /* fall back to defaults */ }
+                return {
+                  contractAddress: tokenAddr,
+                  creator: address,
+                  name,
+                  symbol: sym,
+                  totalSupply: supply,
+                  decimals,
+                  mintable: false,
+                  burnable: false,
+                  pausable: false,
+                  deployedAt: BigInt(0),
+                } as TokenInfo;
               })
             );
-            const lower = address.toLowerCase();
-            myInfos = fullInfos
-              .filter((i): i is TokenInfo => i !== null)
-              .filter((i) => i.creator?.toLowerCase() === lower);
+          } catch { /* ignore */ }
+
+          // 3. Merge + dedupe (by lowercase address). Newest first.
+          const seen = new Set<string>();
+          const merged: TokenInfo[] = [];
+          for (const t of [...deployerMine.reverse(), ...factoryMine.reverse()]) {
+            const key = t.contractAddress.toLowerCase();
+            if (seen.has(key)) continue;
+            seen.add(key);
+            merged.push(t);
           }
           if (cancelled) return;
-          setMyTokens(myInfos.reverse());
+          setMyTokens(merged);
         } else {
           setMyTokens([]);
         }

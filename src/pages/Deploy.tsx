@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { BrowserProvider, Contract, JsonRpcProvider, formatUnits } from "ethers";
+import { BrowserProvider, Contract, JsonRpcProvider, formatUnits, parseEther } from "ethers";
 import { useAccount, useChainId, useSwitchChain } from "wagmi";
 import {
   Rocket,

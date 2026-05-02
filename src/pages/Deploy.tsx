@@ -262,14 +262,15 @@ export default function Deploy() {
       try {
         const provider = new JsonRpcProvider(TOKEN_FACTORY_RPC);
         const factory = new Contract(TOKEN_FACTORY_ADDRESS, TOKEN_FACTORY_ABI, provider);
+        const deployerRead = new Contract(LITDEX_DEPLOYER_ADDRESS, LITDEX_DEPLOYER_ABI, provider);
 
-        const [fee, total] = await Promise.all([
+        const [fee, deployerTotal] = await Promise.all([
           factory.deployFee() as Promise<bigint>,
-          factory.getTotalDeployed() as Promise<bigint>,
+          deployerRead.totalDeployed().catch(() => 0n) as Promise<bigint>,
         ]);
         if (cancelled) return;
         setDeployFee(formatUnits(fee, 18));
-        setTotalDeployed(Number(total));
+        setTotalDeployed(DEPLOY_COUNT_BASE + Number(deployerTotal));
 
         const all = (await factory.getAllTokens()) as string[];
         const recent = all.slice(-20).reverse();

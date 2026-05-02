@@ -48,6 +48,7 @@ export const DAILY_CHECKIN_ABI = [
 export const LITDEX_NFT_ABI = [
   { inputs: [{ name: "nftType", type: "uint8" }], name: "mintNFT", outputs: [], stateMutability: "nonpayable", type: "function" },
   { inputs: [], name: "claimRewards", outputs: [], stateMutability: "nonpayable", type: "function" },
+  { inputs: [{ name: "", type: "uint8" }], name: "totalMinted", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
   { inputs: [{ name: "user", type: "address" }], name: "getPendingRewards", outputs: [
     { name: "zkltc", type: "uint256" },
     { name: "usdc", type: "uint256" },
@@ -62,6 +63,9 @@ export const LITDEX_NFT_ABI = [
   }], stateMutability: "view", type: "function" },
   { inputs: [{ name: "user", type: "address" }], name: "userPoints", outputs: [{ name: "", type: "uint256" }], stateMutability: "view", type: "function" },
 ] as const;
+
+/** Max supply per NFT tier (index 0=Common, 1=Rare, 2=Epic). */
+export const NFT_MAX_SUPPLY: Record<1 | 2 | 3, number> = { 1: 9999, 2: 4999, 3: 999 };
 
 export const readProvider = new JsonRpcProvider(RPC_URL);
 

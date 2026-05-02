@@ -358,12 +358,14 @@ export default function Deploy() {
       const deployer = new Contract(LITDEX_DEPLOYER_ADDRESS, LITDEX_DEPLOYER_ABI, signer);
 
       setStatus({ kind: "info", msg: `Deploying ${form.symbol}… confirm in wallet` });
-      // LitDeXDeployer signature: deployToken(string name, string symbol, uint256 supply)
+      // LitDeXDeployer signature: deployToken(string name, string symbol, uint256 supply) payable
       // Contract handles the 1e18 multiplication internally — pass whole units.
+      // Requires 0.05 zkLTC fee per deploy.
       const tx = await deployer.deployToken(
         form.name.trim(),
         form.symbol.trim(),
         BigInt(form.totalSupply),
+        { value: parseEther(DEPLOY_FEE_ZKLTC) },
       );
       setStatus({ kind: "info", msg: `Tx submitted: ${tx.hash.slice(0, 10)}… waiting for confirmation` });
 

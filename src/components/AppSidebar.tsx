@@ -111,6 +111,11 @@ export function AppSidebar() {
                         )}
                         <item.icon className={`h-4 w-4 ${isActive ? "text-primary" : ""}`} />
                         <span>{item.title}</span>
+                        {item.title === "Deploy Token" && !collapsed && (
+                          <span className="ml-auto rounded-full bg-[#4FD1C5] px-2 py-0.5 text-[10px] font-semibold text-slate-900">
+                            Earn Points
+                          </span>
+                        )}
                       </RouterNavLink>
                     </SidebarMenuButton>
                   </SidebarMenuItem>

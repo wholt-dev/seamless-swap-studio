@@ -466,6 +466,27 @@ export default function Deploy() {
       });
       setForm(DEFAULT_FORM);
       setStep(1);
+      // Optimistically prepend the just-deployed token so the "My Tokens" tab
+      // updates instantly, before the event-log re-fetch finishes.
+      if (tokenAddr) {
+        setMyTokens((prev) => {
+          const key = tokenAddr!.toLowerCase();
+          if (prev.some((t) => t.contractAddress.toLowerCase() === key)) return prev;
+          const optimistic: TokenInfo = {
+            contractAddress: tokenAddr!,
+            creator: address ?? "",
+            name: form.name,
+            symbol: form.symbol,
+            totalSupply: BigInt(form.totalSupply || "0"),
+            decimals: Number(form.decimals) || 18,
+            mintable: form.mintable,
+            burnable: form.burnable,
+            pausable: form.pausable,
+            deployedAt: BigInt(Math.floor(Date.now() / 1000)),
+          };
+          return [optimistic, ...prev];
+        });
+      }
       setRefreshKey((k) => k + 1);
     } catch (e) {
       setStatus({ kind: "error", msg: errMsg(e) });

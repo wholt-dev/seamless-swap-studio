@@ -6,11 +6,16 @@ export const POINTS_SYSTEM_ADDRESS = "0xd985D5042906D94AC482e1e1B60121aC8cc3d162
 
 // LitDeXDeployer — token deployment now goes through this contract; backend
 // relayer auto-credits +5 points per deploy on PointsSystemV4.
-export const LITDEX_DEPLOYER_ADDRESS = "0xb9ADc189545e066c453f8C4492C521db93B37014";
+export const LITDEX_DEPLOYER_ADDRESS = "0x953124243647F043b6D7Eb924e2a89179cBb78da";
 export const LITDEX_DEPLOYER_ABI = [
-  "function deployToken(string _name, string _symbol, uint256 _supply) returns (address)",
+  "function deployToken(string _name, string _symbol, uint256 _supply) payable returns (address)",
+  "function totalDeployed() view returns (uint256)",
   "event TokenDeployed(address indexed deployer, address indexed token, string symbol)",
 ] as const;
+/** Hardcoded base count added on top of on-chain totalDeployed() for display. */
+export const DEPLOY_COUNT_BASE = 323;
+/** Required fee (in zkLTC) per token deploy on the new LitDeXDeployer. */
+export const DEPLOY_FEE_ZKLTC = "0.05";
 export const DAILY_CHECKIN_ADDRESS = "0xBFcdf8b8bb7e779E382c65ca171fa1ee603E9BEa";
 export const LITDEX_NFT_ADDRESS    = "0x1c6806d479071d3595ac0ad0f574aBbCa5290da4";
 export const LDEX_TOKEN_ADDRESS    = "0xBAaba603e6298fbb76325a6B0d47Cd57154ca641";

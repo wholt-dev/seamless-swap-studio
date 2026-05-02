@@ -223,7 +223,7 @@ export const POINTS_PER_ACTION: Record<"swap" | "lp" | "deploy", number> = {
 
 /** NFT tier metadata for UI */
 export const NFT_TIERS = [
-  { id: 1 as const, name: "Common",  cost: 1000,  rewards: { zkltc: "0.0001", usdc: "10",  ldex: "2"  }, border: "border-white/15", glow: "" },
-  { id: 2 as const, name: "Rare",    cost: 5000,  rewards: { zkltc: "0.0005", usdc: "50",  ldex: "10" }, border: "border-blue-400/50", glow: "shadow-[0_0_24px_-6px_rgba(96,165,250,0.5)]" },
-  { id: 3 as const, name: "Epic",    cost: 10000, rewards: { zkltc: "0.001",  usdc: "100", ldex: "20" }, border: "border-purple-400/60", glow: "shadow-[0_0_28px_-4px_rgba(168,85,247,0.55)]" },
+  { id: 1 as const, name: "Common",  cost: 1000,  rewards: { zkltc: "0.0001", usdc: "10",  ldex: "2"  }, border: "border-teal-400/40",   glow: "shadow-[0_0_24px_-6px_rgba(45,212,191,0.55)]", image: "/logos/common_nft.png", imageGlow: "shadow-[0_0_30px_-4px_rgba(45,212,191,0.7)]", floatDelay: "0s",   barColor: "bg-teal-400",   maxSupply: 9999 },
+  { id: 2 as const, name: "Rare",    cost: 5000,  rewards: { zkltc: "0.0005", usdc: "50",  ldex: "10" }, border: "border-blue-400/50",   glow: "shadow-[0_0_24px_-6px_rgba(96,165,250,0.55)]", image: "/logos/rare_nft.png",   imageGlow: "shadow-[0_0_30px_-4px_rgba(96,165,250,0.7)]", floatDelay: "0.5s", barColor: "bg-blue-400",   maxSupply: 4999 },
+  { id: 3 as const, name: "Epic",    cost: 10000, rewards: { zkltc: "0.001",  usdc: "100", ldex: "20" }, border: "border-purple-400/60", glow: "shadow-[0_0_28px_-4px_rgba(168,85,247,0.55)]", image: "/logos/epic_nft.jpg",   imageGlow: "shadow-[0_0_30px_-4px_rgba(168,85,247,0.7)]", floatDelay: "1s",   barColor: "bg-purple-400", maxSupply: 999  },
 ];
